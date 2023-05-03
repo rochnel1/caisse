@@ -103,7 +103,7 @@ function Main({ children }) {
                   {
                     active: true,
                     label: "Plan comptable",
-                    url: "/comptabilisation",
+                    url: "/plan_comptable",
                     icon: <BsListColumnsReverse />,
                   },
                 ]}
@@ -124,19 +124,19 @@ function Main({ children }) {
                   {
                     active: true,
                     label: "Enregistrer un encaissement",
-                    url: "/save_encaiss",
+                    url: `/encaissements`,
                     icon: <GiReceiveMoney />,
                   },
                   {
                     active: true,
                     label: "Enregistrer un décaissement",
-                    url: "/save_decaiss",
+                    url: `/decaissements`,
                     icon: <GiPayMoney />,
                   },
                   {
                     active: true,
                     label: "Fermeture de la caisse",
-                    url: "/",
+                    url: "/fermeture_caisse",
                     icon: <FaFolder />,
                   },
                   { line: true },
@@ -170,14 +170,14 @@ function Main({ children }) {
                   {
                     active: true,
                     label: "Suivi des réalisations",
-                    url: "*",
+                    url: "/suivi_realisations",
                     icon: <FaPercent />,
                   },
                   { line: true },
                   {
                     active: true,
                     label: "Comptabilisation des opérations de caisse",
-                    url: "*",
+                    url: "/comptabilisation",
                     icon: <BsFillJournalBookmarkFill />,
                   },
                 ]}
@@ -192,20 +192,20 @@ function Main({ children }) {
                   {
                     active: true,
                     label: "Historique des encaissements et décaissement",
-                    url: "/",
+                    url: "/historique",
                     icon: <BsFillClockFill />,
                   },
                   {
                     active: true,
                     label: "Etats budgetaire",
-                    url: "/",
+                    url: "/etats_budget",
                     icon: <FaCommentsDollar />,
                   },
                   { line: true },
                   {
                     active: true,
                     label: "Tableau de bord",
-                    url: "/",
+                    url: "/dasboard",
                     icon: <BsBarChartLineFill />,
                   },
                 ]}

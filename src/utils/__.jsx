@@ -92,6 +92,7 @@ export const TValidationButton = ({
   saveAndPrint,
   removeAll,
   validate,
+  close,
 }) => {
   return (
     <>
@@ -107,6 +108,7 @@ export const TValidationButton = ({
         {remove && <button onClick={remove}>Supprimer</button>}
         {validate && <button onClick={validate}>Valider</button>}
         {removeAll && <button onClick={removeAll}>Supprimer Tous</button>}
+        {close && <button onClick={close}>Fermer</button>}
         {children}
       </div>
     </>

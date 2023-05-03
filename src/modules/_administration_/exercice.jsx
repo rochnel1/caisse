@@ -14,9 +14,7 @@ import {
 export const Exercices = ({ children }) => {
   const [itemsExo, setItemsExo] = useState([
     { c1: 2013, c2: "01/01/2013", c3: "31/12/2013", c4: "En cours", c5: "Oui" },
-    { c1: 2013, c2: "01/01/2013", c3: "31/12/2013", c4: "En cours", c5: "Oui" },
-    { c1: 2013, c2: "01/01/2013", c3: "31/12/2013", c4: "En cours", c5: "Oui" },
-    { c1: 2013, c2: "01/01/2013", c3: "31/12/2013", c4: "En cours", c5: "Oui" },
+    { c1: 2013, c2: "01/01/2013", c3: "31/12/2013", c4: "En cours", c5: "Non" },
   ]);
   //
   const [open, setOpen] = useState({ exercice: false });

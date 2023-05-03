@@ -91,7 +91,7 @@ export const EUtilisateur = ({ children, addQuiHandler }) => {
         maxlength={10}
         addChange={changeHandler}
       />
-      <TLayout cols="1fr 2fr">
+      <TLayout cols="1fr 1fr">
         <TInput
           label="Nom(s)"
           name="noms"

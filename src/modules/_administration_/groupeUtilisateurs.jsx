@@ -1,21 +1,16 @@
 import { useState } from "react";
-import { OGroupeUtilisateur } from "./_init_";
 import {
+  TFormList,
   TFormulaire,
-  TModal,
   TInput,
+  TModal,
   TTable,
   TValidationButton,
-  TFormList,
 } from "../../utils/__";
+import { OGroupeUtilisateur } from "./_init_";
 
 export const GroupesUtilisateurs = ({ children }) => {
   const [items, setItems] = useState([
-    { c1: 1, c2: 2, c3: 3 },
-    { c1: 1, c2: 2, c3: 3 },
-    { c1: 1, c2: 2, c3: 3 },
-    { c1: 1, c2: 2, c3: 3 },
-    { c1: 1, c2: 2, c3: 3 },
     { c1: 1, c2: 2, c3: 3 },
     { c1: 1, c2: 2, c3: 3 },
   ]);
@@ -45,7 +40,6 @@ export const GroupesUtilisateurs = ({ children }) => {
           items={items}
           columns={["c1", "c2"]}
           columnsDisplay={["Id Groupe", "Nom du Groupe"]}
-          // columnsWidth={["120px", "auto"]}
         ></TTable>
       </TFormList>
 

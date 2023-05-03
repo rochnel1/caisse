@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { OComptabilisation } from "./_init_";
+import { OComptabilisation } from "../_administration_/_init_";
 import {
   TFormulaire,
   TLayout,
@@ -54,7 +54,7 @@ export const Comptabilisation = ({ children }) => {
   return (
     <>
       <TFormList
-        title="Liste des pièces comptables"
+        title="Comptabilisation des opérations de caisse"
         options={
           <TValidationButton add={add} print={print} validate={validate} />
         }

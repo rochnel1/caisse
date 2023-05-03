@@ -83,9 +83,16 @@ export const ENatureOperation = ({ children, addQuiHandler }) => {
         maxlength={60}
         addChange={changeHandler}
       />
-      <TInput
+      <TSelect
         label="Compte général associé"
         name="compteGeneralAssocie"
+        items={[
+          { value: false, label: "58xxxx" },
+          { value: true, label: "47xxxx" },
+          { value: true, label: "6310xxxx" },
+        ]}
+        columnId="value"
+        columnDisplay="label"
         value={item.compteGeneralAssocie}
         maxlength={60}
         addChange={changeHandler}

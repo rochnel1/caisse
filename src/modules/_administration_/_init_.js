@@ -115,7 +115,7 @@ export const OClotureCaisse = {
   date_cloture: "",
 };
 
-export const OEnregEnDecaissement = {
+export const OEnregistrement = {
   caisse: "",
   caissier: "",
   date_operation: "",
@@ -128,4 +128,13 @@ export const OEnregEnDecaissement = {
   compte_general_associe: "",
   compte_caisse: "",
   etat: "",
+};
+
+export const OPlanComptable = {
+  numero_compte: "",
+  intitule: "",
+};
+export const OSuivRealisation = {
+  exercice: "",
+  periode: "",
 };
