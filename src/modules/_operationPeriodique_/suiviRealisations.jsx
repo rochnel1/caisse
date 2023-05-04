@@ -48,7 +48,7 @@ export const ESuiviRealisations = ({ children }) => {
   return (
     <div>
       <TFormulaire title="Cliquer sur valider pour voir le resultat ">
-        <TLayout cols="1fr 1fr">
+        <TLayout cols="1fr 1fr 1fr">
           <TSelect
             label="Exercice"
             name="exercice"
@@ -70,10 +70,26 @@ export const ESuiviRealisations = ({ children }) => {
               { value: false, label: "Avril" },
               { value: true, label: "Mai" },
               { value: true, label: "Juin" },
+              { value: true, label: "Tous" },
             ]}
             columnId="value"
             columnDisplay="label"
             value={item.periode}
+            maxlength={60}
+            addChange={changeHandler}
+          />
+          <TSelect
+            label="Nature d'opération"
+            name="nature_operation"
+            items={[
+              { value: false, label: "FRAIS_ELECTRICITE" },
+              { value: true, label: "FRAIS_TAXI" },
+              { value: true, label: "LOYER" },
+              { value: true, label: "Tous" },
+            ]}
+            columnId="value"
+            columnDisplay="label"
+            value={item.nature_operation}
             maxlength={60}
             addChange={changeHandler}
           />
