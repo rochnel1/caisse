@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   TFormList,
   TFormulaire,
@@ -8,75 +8,147 @@ import {
   TValidationButton,
 } from "../../utils/__";
 import { OGroupeUtilisateur } from "./_init_";
+import { ENDPOINTS } from "../../utils/Variables";
+import { api } from "../../utils/api";
+
+/*const instance = axios.create();
+instance.defaults.headers.common["Content-Type"] =
+  "application/json; charset=utf-8";*/
 
 export const GroupesUtilisateurs = ({ children }) => {
-  const [items, setItems] = useState([
-    { c1: 1, c2: 2, c3: 3 },
-    { c1: 1, c2: 2, c3: 3 },
-  ]);
+  const [items, setItems] = useState([]);
 
-  const [open, setOpen] = useState({ groupeUtilisateur: false });
+  const [open, setOpen] = useState({
+    groupeUtilisateur: false,
+    Idgpeutilisateur: 0,
+  });
+
+  const [refresh, setRefresh] = useState(false);
 
   const add = (e) => {
-    setOpen({ ...open, groupeUtilisateur: true });
-  };
-
-  const groupe = (e) => {
-    // setOpen({ ...open, groupe: true });
-    console.log("");
+    setOpen({ ...open, groupeUtilisateur: true, Idgpeutilisateur: 0 });
   };
 
   const quit = (e) => {
-    setOpen({ ...open, groupeUtilisateur: false });
+    setOpen({ ...open, groupeUtilisateur: false, groupe: false });
   };
+
+  const modify = (id) => {
+    setOpen({ ...open, groupeUtilisateur: true, Idgpeutilisateur: id });
+  };
+
+  //hooks
+  const rafraichir = () => {
+    setRefresh(!refresh);
+  };
+
+  const loadGpeUtilisateurs = () => {
+    api(ENDPOINTS.groupeUtilisateur)
+      .fetch()
+      .then((res) => setItems(res.data))
+      .catch((err) => alert(err));
+  };
+  useEffect(() => {
+    // console.log("Code With Rochnel");
+    loadGpeUtilisateurs();
+  }, [refresh]);
 
   return (
     <>
       <TFormList
         title="Liste des groupes utilisateurs"
-        options={<TValidationButton add={add} removeAll={groupe} />}
+        options={<TValidationButton add={add} refresh={rafraichir} />}
       >
         <TTable
           items={items}
-          columns={["c1", "c2"]}
-          columnsDisplay={["Id Groupe", "Nom du Groupe"]}
+          columns={[{ name: "Nomgroupe" }]}
+          columnsDisplay={["Nom du Groupe"]}
+          lineClick={(o) => {
+            modify(o.Idgpeutilisateur);
+          }}
         ></TTable>
       </TFormList>
 
       {open.groupeUtilisateur && (
         <TModal>
-          <EGroupeUtilisateur addQuiHandler={quit} />
+          <EGroupeUtilisateur
+            itemId={open.Idgpeutilisateur}
+            addQuiHandler={quit}
+            addRefreshHandler={rafraichir}
+          />
         </TModal>
       )}
     </>
   );
 };
 
-export const EGroupeUtilisateur = ({ children, addQuiHandler }) => {
+export const EGroupeUtilisateur = ({
+  children,
+  addQuiHandler,
+  itemId = 0,
+  addRefreshHandler,
+}) => {
   const [itemGrp, setItemGrp] = useState(OGroupeUtilisateur);
+
   const changeHandler = (e) => {
     setItemGrp({ ...itemGrp, [e.target.name]: e.target.value });
   };
-  const save = (e) => {
-    console.log(itemGrp);
+
+  // const onSubmit = async;
+  const save = async (e) => {
+    if (itemGrp.Idgpeutilisateur === 0) {
+      //nouvel enregistrement
+      delete itemGrp.Idgpeutilisateur;
+      await api(ENDPOINTS.groupeUtilisateur).post(itemGrp);
+    } else {
+      //modification
+      await api(ENDPOINTS.groupeUtilisateur).put(
+        itemGrp.Idgpeutilisateur,
+        itemGrp
+      );
+    }
+    setItemGrp({ ...OGroupeUtilisateur });
+    if (addRefreshHandler) addRefreshHandler();
+    if (addQuiHandler) addQuiHandler();
   };
 
+  const remove = async (e) => {
+    if (itemGrp.Idgpeutilisateur === 0) return;
+    const res = await api(ENDPOINTS.groupeUtilisateur).delete(
+      itemGrp.Idgpeutilisateur,
+      itemGrp
+    );
+    if (addRefreshHandler) addRefreshHandler(res);
+    if (addQuiHandler) addQuiHandler();
+  };
+
+  useEffect(() => {
+    // console.log("Code With Rochnel");
+    setItemGrp({ ...OGroupeUtilisateur });
+    if (itemId !== 0) {
+      api(ENDPOINTS.groupeUtilisateur)
+        .fetchById(itemId)
+        .then((res) => setItemGrp(res.data))
+        .catch((err) => alert(err));
+    }
+  }, []);
   return (
     <TFormulaire
       title="Nouveau Groupe d'utlisateur"
-      valPanel={<TValidationButton add={save} cancel={addQuiHandler} />}
+      valPanel={
+        <TValidationButton
+          add={save}
+          remove={(e) =>
+            itemGrp.Idgpeutilisateur !== 0 ? remove() : undefined
+          }
+          cancel={addQuiHandler}
+        />
+      }
     >
       <TInput
-        label="Id du groupe"
-        name="idGroupe"
-        value={itemGrp.idGroupe}
-        maxlength={60}
-        addChange={changeHandler}
-      />
-      <TInput
         label="Nom du groupe"
-        name="nomGroupe"
-        value={itemGrp.nomGroupe}
+        name="nomgroupe"
+        value={itemGrp.Nomgroupe}
         maxlength={60}
         addChange={changeHandler}
       />

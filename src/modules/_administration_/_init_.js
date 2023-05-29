@@ -1,14 +1,14 @@
 export const OUtilisateur = {
-  login: "",
-  noms: "",
-  prenoms: "",
-  mdp: "",
-  idGroupe: 0,
+  IdUtilisateur: 0,
+  Login: "",
+  Nomutilisateur: "",
+  Prenomutilisateur: "",
+  Idgpeutilisateur: 0,
 };
 
 export const OGroupeUtilisateur = {
-  idGroupe: 0,
-  nomGroupe: "",
+  Idgpeutilisateur: 0,
+  Nomgroupe: "",
 };
 
 export const OCaisse = {
@@ -27,6 +27,8 @@ export const OPersonnel = {
 };
 
 export const ONatureOperation = {
+  idnatureoperation: 0,
+  idcompte: 0,
   code: "",
   description: "",
   compteGeneralAssocie: "",
@@ -35,18 +37,21 @@ export const ONatureOperation = {
 };
 
 export const OExercice = {
+  idexercice: 0,
   code: "",
-  date_debut: "",
-  date_fin: "",
+  datedebut: "",
+  datefin: "",
   statut: "",
   cloture: "",
 };
 
 export const OPeriode = {
+  idperiode: 0,
   exercice: "",
-  code_periode: "",
-  date_debut: "",
-  date_fin: "",
+  codeperiode: "",
+  datedebut: "",
+  datefin: "",
+  idexercice: 0,
 };
 
 export const OComptabilisation = {
@@ -131,7 +136,8 @@ export const OEnregistrement = {
 };
 
 export const OPlanComptable = {
-  numero_compte: "",
+  idcompte: 0,
+  numcompte: "",
   intitule: "",
 };
 export const OSuivRealisation = {

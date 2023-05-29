@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ONatureOperation, OPersonnel } from "./_init_";
 import {
   TFormulaire,
@@ -9,32 +9,64 @@ import {
   TFormList,
   TSelect,
 } from "../../utils/__";
+import { api } from "../../utils/api";
+import { ENDPOINTS } from "../../utils/Variables";
 
 export const NatureOperation = ({ children }) => {
-  const [open, setOpen] = useState({ natureOp: false });
+  const [items, setItems] = useState([]);
+  const [refresh, setRefresh] = useState(false);
+
+  const [open, setOpen] = useState({ natureOp: false, idnatureoperation: 0 });
 
   const add = (e) => {
-    setOpen({ ...open, natureOp: true });
+    setOpen({ ...open, natureOp: true, idnatureoperation: 0 });
   };
 
   const quit = (e) => {
     setOpen({ ...open, natureOp: false });
   };
 
-  const removeAll = (e) => {
-    console.log("remove all");
+  const modify = (id) => {
+    setOpen({ ...open, natureOp: true, idnatureoperation: id });
   };
 
-  const [items, setItems] = useState([{ c1: 1, c2: 2, c3: 3, c4: 4, c5: 5 }]);
+  //hooks
+  const rafraichir = () => {
+    setRefresh(!refresh);
+  };
+
+  const loadItems = () => {
+    api(ENDPOINTS.natureoperations)
+      .fetch()
+      .then((res) => setItems(res.data))
+      .catch((err) => alert(err));
+  };
+  useEffect(() => {
+    // console.log("Code With Rochnel");
+    loadItems();
+  }, [refresh]);
+
+  const setBabalScript = (bab) => {
+    return <>{bab}</>;
+  };
   return (
     <>
       <TFormList
         title="Liste des natures d'opérations"
-        options={<TValidationButton add={add} removeAll={removeAll} />}
+        options={<TValidationButton add={add} refresh={rafraichir} />}
       >
         <TTable
           items={items}
-          columns={["c1", "c2", "c3", "c4", "c5"]}
+          columns={[
+            { name: "codenature" },
+            { name: "description" },
+            {
+              name: "",
+              render: (o) => setBabalScript(o.idcompteNavigation?.numcompte),
+            },
+            { name: "typenature" },
+            { name: "sensnature" },
+          ]}
           columnsDisplay={[
             "Code",
             "Description",
@@ -42,32 +74,91 @@ export const NatureOperation = ({ children }) => {
             "Type de nature",
             "Sens",
           ]}
-          // columnsWidth={["120px", "auto"]}
+          lineClick={(o) => {
+            modify(o.idnatureoperation);
+          }}
         ></TTable>
       </TFormList>
 
       {open.natureOp && (
         <TModal>
-          <ENatureOperation addQuiHandler={quit} />
+          <ENatureOperation
+            addQuiHandler={quit}
+            itemId={open.idnatureoperation}
+            addRefreshHandler={rafraichir}
+          />
         </TModal>
       )}
     </>
   );
 };
 
-export const ENatureOperation = ({ children, addQuiHandler }) => {
+export const ENatureOperation = ({
+  children,
+  itemId = 0,
+  addRefreshHandler,
+  addQuiHandler,
+}) => {
   const [item, setItem] = useState(ONatureOperation);
+
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
-  const save = (e) => {
-    console.log(item);
+  console.log(item);
+  const save = async (e) => {
+    // console.log(item);
+    if (item.idnatureoperation === 0) {
+      delete item.idnatureoperation;
+      await api(ENDPOINTS.natureoperations).post(item);
+    } else {
+      await api(ENDPOINTS.natureoperations).put(item.idnatureoperation, item);
+    }
+    setItem({ ...ONatureOperation });
+    if (addRefreshHandler) addRefreshHandler();
+    if (addQuiHandler) addQuiHandler();
   };
 
+  const remove = async (e) => {
+    if (item.idnatureoperation === 0) return;
+    const res = await api(ENDPOINTS.natureoperations).delete(
+      item.idnatureoperation,
+      item
+    );
+    if (addRefreshHandler) addRefreshHandler(res);
+    if (addQuiHandler) addQuiHandler();
+  };
+
+  //
+  const [natureGroupes, setNatureGroupes] = useState([]);
+
+  const loadItems = () => {
+    api(ENDPOINTS.compteGenerals)
+      .fetch()
+      .then((res) => setNatureGroupes(res.data))
+      .catch((err) => alert(err));
+  };
+
+  useEffect(() => {
+    // console.log("Code With Rochnel");
+    setItem({ ...ONatureOperation });
+    if (itemId !== 0) {
+      api(ENDPOINTS.natureoperations)
+        .fetchById(itemId)
+        .then((res) => setItem(res.data))
+        .catch((err) => alert(err));
+    }
+    loadItems();
+  }, []);
   return (
     <TFormulaire
       title="Nouvelle nature d'opération"
-      valPanel={<TValidationButton add={save} cancel={addQuiHandler} />}
+      valPanel={
+        <TValidationButton
+          add={save}
+          remove={(e) => (item.idnatureoperation !== 0 ? remove() : undefined)}
+          cancel={addQuiHandler}
+        />
+      }
     >
       <TInput
         label="Code"
@@ -86,13 +177,9 @@ export const ENatureOperation = ({ children, addQuiHandler }) => {
       <TSelect
         label="Compte général associé"
         name="compteGeneralAssocie"
-        items={[
-          { value: false, label: "58xxxx" },
-          { value: true, label: "47xxxx" },
-          { value: true, label: "6310xxxx" },
-        ]}
-        columnId="value"
-        columnDisplay="label"
+        items={natureGroupes}
+        columnId="idcompteNavigation"
+        columnDisplay="numcompte"
         value={item.compteGeneralAssocie}
         maxlength={60}
         addChange={changeHandler}

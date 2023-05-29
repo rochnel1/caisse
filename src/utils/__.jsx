@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate, useNavigation } from "react-router-dom";
 
 export const TInput = ({
@@ -92,6 +93,7 @@ export const TValidationButton = ({
   saveAndPrint,
   removeAll,
   validate,
+  refresh,
   close,
 }) => {
   return (
@@ -108,6 +110,7 @@ export const TValidationButton = ({
         {remove && <button onClick={remove}>Supprimer</button>}
         {validate && <button onClick={validate}>Valider</button>}
         {removeAll && <button onClick={removeAll}>Supprimer Tous</button>}
+        {refresh && <button onClick={refresh}>Rafraichir</button>}
         {close && <button onClick={close}>Fermer</button>}
         {children}
       </div>
@@ -176,10 +179,16 @@ export const TModal = ({ children }) => {
 export const TTable = ({
   children,
   items,
-  columns = [],
+  columns = [{ name: "", render: null }],
   columnsDisplay = [],
   columnsWidth = [],
+  lineClick,
 }) => {
+  const [list, setlist] = useState([]);
+  useEffect(() => {
+    setlist(items);
+  }, [items]);
+
   return (
     <>
       <table cellPadding={0} cellSpacing={0}>
@@ -194,11 +203,22 @@ export const TTable = ({
           </tr>
         </thead>
         <tbody>
-          {items &&
-            items.map((o, i) => (
-              <tr key={i}>
+          {list &&
+            list.map((o, i) => (
+              <tr
+                key={i}
+                onClick={() => {
+                  if (lineClick) lineClick(o, i);
+                }}
+              >
                 {columns &&
-                  columns.map((obj, ind) => <td key={ind}>{o[obj]}</td>)}
+                  columns.map((obj, ind) => (
+                    <td key={ind}>
+                      {obj.render == undefined || obj.render == null
+                        ? o[obj.name]
+                        : obj.render(o)}
+                    </td>
+                  ))}
               </tr>
             ))}
         </tbody>
