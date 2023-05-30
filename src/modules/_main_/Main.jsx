@@ -102,7 +102,7 @@ function Main({ children }) {
                   },
                   {
                     active: true,
-                    label: "Plan comptable",
+                    label: "Comptes généraux",
                     url: "/plan_comptable",
                     icon: <BsListColumnsReverse />,
                   },

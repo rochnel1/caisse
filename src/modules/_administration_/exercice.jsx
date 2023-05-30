@@ -18,23 +18,23 @@ export const Exercices = ({ children }) => {
   const [items, setItems] = useState([]);
   const [refresh, setRefresh] = useState(false);
   //
-  const [open, setOpen] = useState({ exercice: false, idexercice: 0 });
+  const [open, setOpen] = useState({ exercice: false, Idexercice: 0 });
 
   const add = (e) => {
-    setOpen({ ...open, exercice: true, idexercice: 0 });
+    setOpen({ ...open, exercice: true, Idexercice: 0 });
   };
 
   const modify = (id) => {
-    setOpen({ ...open, exercice: true, idexercice: id });
+    setOpen({ ...open, exercice: true, Idexercice: id });
+    //<Periodes id={id} />;
   };
 
   const print = (e) => {
-    // setOpen({ ...open, groupe: true });
     console.log("Impression");
   };
 
   const quit = (e) => {
-    setOpen({ ...open, exercice: false, groupe: false });
+    setOpen({ ...open, exercice: false });
   };
 
   const rafraichir = () => {
@@ -49,7 +49,6 @@ export const Exercices = ({ children }) => {
   };
 
   useEffect(() => {
-    // console.log("Code With Rochnel");
     loadItems();
   }, [refresh]);
 
@@ -64,11 +63,11 @@ export const Exercices = ({ children }) => {
         <TTable
           items={items}
           columns={[
-            { name: "code" },
-            { name: "datedebut" },
-            { name: "datefin" },
-            { name: "statut" },
-            { name: "cloture" },
+            { name: "Code" },
+            { name: "Datedebut" },
+            { name: "Datefin" },
+            { name: "Statut", render: (o) => (o.Statut ? "En cours" : "") },
+            { name: "Cloture", render: (o) => (o.Cloture ? "Oui" : "Non") },
           ]}
           columnsDisplay={[
             "Code",
@@ -78,14 +77,14 @@ export const Exercices = ({ children }) => {
             "Cloturé",
           ]}
           lineClick={(o) => {
-            modify(o.idexercice);
+            modify(o.Idexercice);
           }}
         ></TTable>
       </TFormList>
       {open.exercice && (
         <TModal>
           <EExercices
-            itemId={open.idexercice}
+            itemId={open.Idexercice}
             addQuiHandler={quit}
             addRefreshHandler={rafraichir}
           />
@@ -103,40 +102,38 @@ export const EExercices = ({
   addRefreshHandler,
 }) => {
   const [item, setItem] = useState(OExercice);
-  console.log(item.idexercice);
 
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
+  const changeCheckboxHandler = (e) => {
+    setItem({ ...item, [e.target.name]: e.target.checked });
+  };
 
   const save = async (e) => {
-    // console.log(itemId);
-    console.log(item.idexercice);
-    if (item.idexercice === 0) {
-      //nouvel enregistrement
-      delete item.idexercice;
-      await api(ENDPOINTS.exercices).post(item);
-    } else {
-      //modification
-      //await api(ENDPOINTS.exercices).put(item.idexercice, item);
+    try {
+      if (item.Idexercice === 0) {
+        //nouvel enregistrement
+        delete item.Idexercice;
+        await api(ENDPOINTS.exercices).post(item);
+      } else {
+        //modification
+        await api(ENDPOINTS.exercices).put(item.Idexercice, item);
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setItem(OExercice);
+      if (addRefreshHandler) addRefreshHandler();
+      if (addQuiHandler) addQuiHandler();
     }
-    setItem({ ...OExercice });
-    if (addRefreshHandler) addRefreshHandler();
-    if (addQuiHandler) addQuiHandler();
   };
 
   const remove = async (e) => {
-    if (item.idexercice === 0) return;
-    const res = await api(ENDPOINTS.exercices).delete(item.idexercice, item);
+    if (item.Idexercice === 0) return;
+    const res = await api(ENDPOINTS.exercices).delete(item.Idexercice, item);
     if (addRefreshHandler) addRefreshHandler(res);
     if (addQuiHandler) addQuiHandler();
-  };
-
-  const loadItems = () => {
-    api(ENDPOINTS.exercices)
-      .fetch()
-      .then((res) => setItem(res.data))
-      .catch((err) => alert(err));
   };
 
   useEffect(() => {
@@ -148,7 +145,6 @@ export const EExercices = ({
         .then((res) => setItem(res.data))
         .catch((err) => alert(err));
     }
-    loadItems();
   }, []);
 
   return (
@@ -158,14 +154,14 @@ export const EExercices = ({
         <TValidationButton
           add={save}
           cancel={addQuiHandler}
-          remove={(e) => (item.idUtilisateur !== 0 ? remove() : undefined)}
+          remove={(e) => (item.Idexercice !== 0 ? remove() : undefined)}
         />
       }
     >
       <TInput
         label="Code"
-        name="code"
-        value={item.code}
+        name="Code"
+        value={item.Code}
         maxlength={60}
         addChange={changeHandler}
       />
@@ -173,16 +169,16 @@ export const EExercices = ({
         <TInput
           type="date"
           label="Date de début"
-          name="datedebut"
-          value={jsonDateConvert(item.datedebut)}
+          name="Datedebut"
+          value={jsonDateConvert(item.Datedebut)}
           maxlength={60}
           addChange={changeHandler}
         />
         <TInput
           type="date"
           label="Date de fin"
-          name="datefin"
-          value={jsonDateConvert(item.datefin)}
+          name="Datefin"
+          value={jsonDateConvert(item.Datefin)}
           maxlength={60}
           addChange={changeHandler}
         />
@@ -191,39 +187,35 @@ export const EExercices = ({
       <TInput
         label="En cours"
         type="checkbox"
-        name="statut"
-        value={(item.statut = "En cours")}
+        name="Statut"
+        value={item.Statut}
         maxlength={60}
-        addChange={changeHandler}
+        addChange={changeCheckboxHandler}
       />
-      <TSelect
-        label="Cloturé"
-        name="cloture"
-        items={[
-          { value: "Non", label: "Non" },
-          { value: "oui", label: "Oui" },
-        ]}
-        columnId="value"
-        columnDisplay="label"
-        value={item.cloture}
-        addChange={changeHandler}
+      <TInput
+        label="Clôturer l'exercice"
+        type="checkbox"
+        name="Cloture"
+        value={item.Cloture}
+        maxlength={60}
+        addChange={changeCheckboxHandler}
       />
       {children}
     </TFormulaire>
   );
 };
 
-export const Periodes = ({ children }) => {
+export const Periodes = ({ children, id }) => {
   const [items, setItems] = useState([]);
-  const [open, setOpen] = useState({ periode: false, idperiode: 0 });
+  const [open, setOpen] = useState({ periode: false, Idperiode: 0 });
   const [refresh, setRefresh] = useState(false);
 
   const add = (e) => {
-    setOpen({ ...open, periode: true, idperiode: 0 });
+    setOpen({ ...open, periode: true, Idperiode: 0 });
   };
 
   const modify = (id) => {
-    setOpen({ ...open, periode: true, idperiode: id });
+    setOpen({ ...open, periode: true, Idperiode: id });
   };
 
   const quit = (e) => {
@@ -242,7 +234,6 @@ export const Periodes = ({ children }) => {
   };
 
   useEffect(() => {
-    // console.log("Code With Rochnel");
     loadItems();
   }, [refresh]);
 
@@ -261,11 +252,11 @@ export const Periodes = ({ children }) => {
           columns={[
             {
               name: "",
-              render: (o) => setBabalScript(o.idexerciceNavigation?.code),
+              render: (o) => setBabalScript(o.IdexerciceNavigation?.Code),
             },
-            { name: "codeperiode" },
-            { name: "datedebut" },
-            { name: "datefin" },
+            { name: "Codeperiode" },
+            { name: "Datedebut" },
+            { name: "Datefin" },
           ]}
           columnsDisplay={[
             "Exercice",
@@ -274,7 +265,7 @@ export const Periodes = ({ children }) => {
             "Date de Fin",
           ]}
           lineClick={(o) => {
-            modify(o.idperiode);
+            modify(o.Idperiode);
           }}
         ></TTable>
       </TFormList>
@@ -282,7 +273,7 @@ export const Periodes = ({ children }) => {
         <TModal>
           <EPeriodes
             addQuiHandler={quit}
-            itemId={open.idperiode}
+            itemId={open.Idperiode}
             addRefreshHandler={rafraichir}
           />
         </TModal>
@@ -302,15 +293,16 @@ export const EPeriodes = ({
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
+  console.log(item);
 
   const save = async (e) => {
-    if (item.idperiode === 0) {
+    if (item.Idperiode === 0) {
       //nouvel enregistrement
-      delete item.idperiode;
+      delete item.Idperiode;
       await api(ENDPOINTS.periodes).post(item);
     } else {
       //modification
-      await api(ENDPOINTS.periodes).put(item.idperiode, item);
+      await api(ENDPOINTS.periodes).put(item.Idperiode, item);
     }
     setItem({ ...OPeriode });
     if (addRefreshHandler) addRefreshHandler();
@@ -318,8 +310,8 @@ export const EPeriodes = ({
   };
 
   const remove = async (e) => {
-    if (item.idperiode === 0) return;
-    const res = await api(ENDPOINTS.periodes).delete(item.idperiode, item);
+    if (item.Idperiode === 0) return;
+    const res = await api(ENDPOINTS.periodes).delete(item.Idperiode, item);
     if (addRefreshHandler) addRefreshHandler(res);
     if (addQuiHandler) addQuiHandler();
   };
@@ -341,7 +333,7 @@ export const EPeriodes = ({
       api(ENDPOINTS.periodes)
         .fetchById(itemId)
         .then((res) => {
-          console.log(res.data);
+          console.log(itemId);
           setItem(res.data);
           // alert(JSON.stringify(res.data));
         })
@@ -357,24 +349,24 @@ export const EPeriodes = ({
         <TValidationButton
           add={save}
           cancel={addQuiHandler}
-          remove={(e) => (item.idperiode !== 0 ? remove() : undefined)}
+          remove={(e) => (item.Idperiode !== 0 ? remove() : undefined)}
         />
       }
     >
       <TLayout cols="1fr 1fr">
         <TSelect
           label="Exercice"
-          name="exercice"
+          name="Idexercice"
           items={exos}
-          columnId="idexercice"
-          columnDisplay="code"
-          value={item.idexercice}
+          columnId="Idexercice"
+          columnDisplay="Code"
+          value={item.Idexercice}
           addChange={changeHandler}
         />
         <TInput
           label="Code période"
-          name="codeperiode"
-          value={item.codeperiode}
+          name="Codeperiode"
+          value={item.Codeperiode}
           maxlength={60}
           addChange={changeHandler}
         />
@@ -384,16 +376,16 @@ export const EPeriodes = ({
         <TInput
           type="date"
           label="Date de début"
-          name="datedebut"
-          value={jsonDateConvert(item.datedebut)}
+          name="Datedebut"
+          value={jsonDateConvert(item.Datedebut)}
           maxlength={60}
           addChange={changeHandler}
         />
         <TInput
           type="date"
           label="Date de fin"
-          name="datefin"
-          value={jsonDateConvert(item.datefin)}
+          name="Datefin"
+          value={jsonDateConvert(item.Datefin)}
           maxlength={60}
           addChange={changeHandler}
         />

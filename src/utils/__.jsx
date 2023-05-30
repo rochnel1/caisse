@@ -30,7 +30,7 @@ export const TInput = ({
           <input
             type={type}
             name={name}
-            value={value}
+            checked={value}
             placeholder={placeholder}
             maxLength={maxlength}
             onChange={addChange}

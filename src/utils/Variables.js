@@ -18,4 +18,5 @@ export const ENDPOINTS = {
   personnels: "Personnels",
   operations: "Operations",
   budgets: "Budgets",
+  generalites: "Generalites",
 };

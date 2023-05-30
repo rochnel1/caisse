@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TFormList,
   TFormulaire,
@@ -9,33 +9,48 @@ import {
   TTable,
   TValidationButton,
 } from "../../utils/__";
-import { OOuvertureCaisse } from "../_administration_/_init_";
+import { OOperation, OOuvertureCaisse } from "../_administration_/_init_";
+import { ENDPOINTS } from "../../utils/Variables";
+import { api } from "../../utils/api";
 
 export const OuvertureCaisse = ({ children }) => {
-  const [items, setItems] = useState([
-    {
-      c1: "CAISSE_PRINCIPALE",
-      c2: "Charline",
-      c3: 2023,
-      c4: "MAI",
-      c5: "57xxxx",
-    },
-  ]);
+  const [items, setItems] = useState([]);
+  const [refresh, setRefresh] = useState(false);
 
   const [open, setOpen] = useState({
     ouvertureCaisse: false,
+    IdOperation: 0,
   });
   const add = (e) => {
-    setOpen({ ...open, ouvertureCaisse: true });
+    setOpen({ ...open, ouvertureCaisse: true, IdOperation: 0 });
+  };
+
+  const modify = (id) => {
+    setOpen({ ...open, ouvertureCaisse: true, IdOperation: id });
   };
 
   const print = (e) => {
     // setOpen({ ...open, groupe: true });
     console.log("Impression");
   };
-  const remove = (e) => {
-    // setOpen({ ...open, groupe: true });
-    console.log("Suppression");
+
+  //hooks
+  const rafraichir = () => {
+    setRefresh(!refresh);
+  };
+
+  const loadItems = () => {
+    api(ENDPOINTS.operations)
+      .fetch()
+      .then((res) => setItems(res.data))
+      .catch((err) => alert(err));
+  };
+  useEffect(() => {
+    loadItems();
+  }, [refresh]);
+
+  const setBabalScript = (bab) => {
+    return <>{bab}</>;
   };
   const quit = (e) => {
     setOpen({ ...open, ouvertureCaisse: false });
@@ -44,11 +59,38 @@ export const OuvertureCaisse = ({ children }) => {
     <>
       <TFormList
         title="Liste des caisses ouvertes"
-        options={<TValidationButton add={add} print={print} remove={remove} />}
+        options={
+          <TValidationButton add={add} print={print} refresh={rafraichir} />
+        }
       >
         <TTable
           items={items}
-          columns={["c1", "c2", "c3", "c4", "c5"]}
+          columns={[
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdcaisseNavigation?.Codecaisse),
+            },
+            {
+              name: "",
+              render: (o) =>
+                setBabalScript(o.IdpersonnelNavigation?.Codepersonnel),
+            },
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdexerciceNavigation?.Code),
+            },
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdperiodeNavigation?.Codeperiode),
+            },
+            {
+              name: "",
+              render: (o) =>
+                setBabalScript(
+                  o.IdcaisseNavigation?.IdcompteNavigation?.Numcompte
+                ),
+            },
+          ]}
           columnsDisplay={[
             "Caisse",
             "Caissier",
@@ -56,52 +98,102 @@ export const OuvertureCaisse = ({ children }) => {
             "Période",
             "Compte de caisse",
           ]}
-          // columnsWidth={["120px", "auto"]}
+          lineClick={(o) => {
+            modify(o.IdOperation);
+          }}
         ></TTable>
       </TFormList>
       {open.ouvertureCaisse && (
         <TModal>
-          <EOuvertureCaisse addQuiHandler={quit} />
+          <EOuvertureCaisse
+            addQuiHandler={quit}
+            itemId={open.IdOperation}
+            addRefreshHandler={rafraichir}
+          />
         </TModal>
       )}
     </>
   );
 };
 
-export const EOuvertureCaisse = ({ children, addQuiHandler }) => {
-  const [item, setItem] = useState(OOuvertureCaisse);
+export const EOuvertureCaisse = ({
+  children,
+  addQuiHandler,
+  itemId = 0,
+  addRefreshHandler,
+}) => {
+  const [item, setItem] = useState(OOperation);
+
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
-  const save = (e) => {
+
+  const save = async (e) => {
     console.log(item);
+    if (item.IdOperation === 0) {
+      //nouvel enregistrement
+      delete item.IdUtilisateur;
+      await api(ENDPOINTS.operations).post(item);
+    } else {
+      //modification
+      await api(ENDPOINTS.operations).put(item.IdOperation, item);
+    }
+    setItem({ ...OOperation });
+    if (addRefreshHandler) addRefreshHandler();
+    if (addQuiHandler) addQuiHandler();
   };
+
+  const remove = async (e) => {
+    if (item.IdOperation === 0) return;
+    const res = await api(ENDPOINTS.operations).delete(item.IdOperation, item);
+    if (addRefreshHandler) addRefreshHandler(res);
+    if (addQuiHandler) addQuiHandler();
+  };
+
+  const [caisse, setCaisse] = useState([]);
+  const [personne, setPersonne] = useState([]);
+  const [exercice, setExercice] = useState([]);
+  const [periode, setPeriode] = useState([]);
+
+  useEffect(() => {
+    setItem({ ...OOperation });
+    if (itemId !== 0) {
+      api(ENDPOINTS.operations)
+        .fetchById(itemId)
+        .then((res) => setItem(res.data))
+        .catch((err) => alert(err));
+    }
+  }, []);
+
   return (
     <TFormulaire
       title="Ouverture d'une caisse"
-      valPanel={<TValidationButton save={save} cancel={addQuiHandler} />}
+      valPanel={
+        <TValidationButton
+          save={save}
+          remove={(e) => (item.IdOperation !== 0 ? remove() : undefined)}
+          cancel={addQuiHandler}
+        />
+      }
     >
       <TLayout cols="1fr 1fr">
         <TSelect
           label="Caisse"
-          name="caisse"
-          items={[{ value: false, label: "CAISSE_PRINCIPALE" }]}
-          columnId="value"
-          columnDisplay="label"
-          value={item.caisse}
+          name="Idcaisse"
+          items={caisse}
+          columnId="Idcaisse"
+          columnDisplay="Codecaisse"
+          value={item.Idcaisse}
           maxlength={60}
           addChange={changeHandler}
         />
         <TSelect
           label="Caissier"
-          name="caissier"
-          items={[
-            { value: false, label: "Charline" },
-            { value: true, label: "Phirmin" },
-          ]}
-          columnId="value"
-          columnDisplay="label"
-          value={item.caissier}
+          name="Idpersonnel"
+          items={personne}
+          columnId="Idpersonnel"
+          columnDisplay="Codepersonnel"
+          value={item.Idpersonnel}
           maxlength={60}
           addChange={changeHandler}
         />
@@ -110,39 +202,26 @@ export const EOuvertureCaisse = ({ children, addQuiHandler }) => {
       <TLayout cols="1fr 1fr">
         <TSelect
           label="Exercice"
-          name="exercice"
-          items={[
-            { value: false, label: "2022" },
-            { value: true, label: "2023" },
-          ]}
-          columnId="value"
-          columnDisplay="label"
-          value={item.exercice}
+          name="Idexercice"
+          items={exercice}
+          columnId="Idexercice"
+          columnDisplay="Code"
+          value={item.Idexercice}
           maxlength={60}
           addChange={changeHandler}
         />
         <TSelect
           label="Période"
-          name="periode"
-          items={[
-            { value: false, label: "Avril" },
-            { value: true, label: "Mai" },
-          ]}
-          columnId="value"
-          columnDisplay="label"
-          value={item.periode}
+          name="Idperiode"
+          items={periode}
+          columnId="Idperiode"
+          columnDisplay="Codeperiode"
+          value={item.Idperiode}
           maxlength={60}
           addChange={changeHandler}
         />
       </TLayout>
 
-      <TInput
-        label="Compte de la caisse"
-        name="compte_caisse"
-        value={item.compte_caisse}
-        maxlength={60}
-        addChange={changeHandler}
-      />
       {children}
     </TFormulaire>
   );

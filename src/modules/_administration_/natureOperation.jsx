@@ -16,10 +16,10 @@ export const NatureOperation = ({ children }) => {
   const [items, setItems] = useState([]);
   const [refresh, setRefresh] = useState(false);
 
-  const [open, setOpen] = useState({ natureOp: false, idnatureoperation: 0 });
+  const [open, setOpen] = useState({ natureOp: false, Idnatureoperation: 0 });
 
   const add = (e) => {
-    setOpen({ ...open, natureOp: true, idnatureoperation: 0 });
+    setOpen({ ...open, natureOp: true, Idnatureoperation: 0 });
   };
 
   const quit = (e) => {
@@ -27,7 +27,7 @@ export const NatureOperation = ({ children }) => {
   };
 
   const modify = (id) => {
-    setOpen({ ...open, natureOp: true, idnatureoperation: id });
+    setOpen({ ...open, natureOp: true, Idnatureoperation: id });
   };
 
   //hooks
@@ -58,14 +58,14 @@ export const NatureOperation = ({ children }) => {
         <TTable
           items={items}
           columns={[
-            { name: "codenature" },
-            { name: "description" },
+            { name: "Codenature" },
+            { name: "Description" },
             {
               name: "",
-              render: (o) => setBabalScript(o.idcompteNavigation?.numcompte),
+              render: (o) => setBabalScript(o.IdcompteNavigation?.Numcompte),
             },
-            { name: "typenature" },
-            { name: "sensnature" },
+            { name: "Typenature" },
+            { name: "Sensnature" },
           ]}
           columnsDisplay={[
             "Code",
@@ -75,7 +75,7 @@ export const NatureOperation = ({ children }) => {
             "Sens",
           ]}
           lineClick={(o) => {
-            modify(o.idnatureoperation);
+            modify(o.Idnatureoperation);
           }}
         ></TTable>
       </TFormList>
@@ -84,7 +84,7 @@ export const NatureOperation = ({ children }) => {
         <TModal>
           <ENatureOperation
             addQuiHandler={quit}
-            itemId={open.idnatureoperation}
+            itemId={open.Idnatureoperation}
             addRefreshHandler={rafraichir}
           />
         </TModal>
@@ -104,14 +104,26 @@ export const ENatureOperation = ({
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
-  console.log(item);
   const save = async (e) => {
-    // console.log(item);
-    if (item.idnatureoperation === 0) {
-      delete item.idnatureoperation;
+    if (item.Sensnature === 0) {
+      item.Sensnature = "Encaissement";
+    } else if (item.Sensnature === 1) {
+      item.Sensnature = "Décaissement";
+    } else {
+      item.Sensnature = "Les Deux";
+    }
+
+    item.TypeNature === 0
+      ? (item.TypeNature = "Opération")
+      : (item.TypeNature = "Régularisation");
+
+    console.log(item);
+
+    if (item.Idnatureoperation === 0) {
+      delete item.Idnatureoperation;
       await api(ENDPOINTS.natureoperations).post(item);
     } else {
-      await api(ENDPOINTS.natureoperations).put(item.idnatureoperation, item);
+      await api(ENDPOINTS.natureoperations).put(item.Idnatureoperation, item);
     }
     setItem({ ...ONatureOperation });
     if (addRefreshHandler) addRefreshHandler();
@@ -119,9 +131,9 @@ export const ENatureOperation = ({
   };
 
   const remove = async (e) => {
-    if (item.idnatureoperation === 0) return;
+    if (item.Idnatureoperation === 0) return;
     const res = await api(ENDPOINTS.natureoperations).delete(
-      item.idnatureoperation,
+      item.Idnatureoperation,
       item
     );
     if (addRefreshHandler) addRefreshHandler(res);
@@ -129,12 +141,12 @@ export const ENatureOperation = ({
   };
 
   //
-  const [natureGroupes, setNatureGroupes] = useState([]);
+  const [Compta, setPlanCompta] = useState([]);
 
   const loadItems = () => {
     api(ENDPOINTS.compteGenerals)
       .fetch()
-      .then((res) => setNatureGroupes(res.data))
+      .then((res) => setPlanCompta(res.data))
       .catch((err) => alert(err));
   };
 
@@ -155,50 +167,50 @@ export const ENatureOperation = ({
       valPanel={
         <TValidationButton
           add={save}
-          remove={(e) => (item.idnatureoperation !== 0 ? remove() : undefined)}
+          remove={(e) => (item.Idnatureoperation !== 0 ? remove() : undefined)}
           cancel={addQuiHandler}
         />
       }
     >
       <TInput
         label="Code"
-        name="code"
-        value={item.code}
+        name="Codenature"
+        value={item.Codenature}
         maxlength={60}
         addChange={changeHandler}
       />
       <TInput
         label="Description"
-        name="description"
-        value={item.description}
+        name="Description"
+        value={item.Description}
         maxlength={60}
         addChange={changeHandler}
       />
       <TSelect
         label="Compte général associé"
-        name="compteGeneralAssocie"
-        items={natureGroupes}
-        columnId="idcompteNavigation"
-        columnDisplay="numcompte"
-        value={item.compteGeneralAssocie}
+        name="Idcompte"
+        items={Compta}
+        columnId="Idcompte"
+        columnDisplay="Numcompte"
+        value={item.Idcompte}
         maxlength={60}
         addChange={changeHandler}
       />
       <TSelect
         label="Type de nature"
-        name="typeNature"
+        name="TypeNature"
         items={[
-          { value: false, label: "Opération" },
-          { value: true, label: "Regularisation" },
+          { value: 0, label: "Opération" },
+          { value: 1, label: "Regularisation" },
         ]}
         columnId="value"
         columnDisplay="label"
-        value={item.typeNature}
+        value={item.TypeNature}
         addChange={changeHandler}
       />
       <TSelect
         label="Sens"
-        name="sens"
+        name="Sensnature"
         items={[
           { value: 0, label: "Encaissement" },
           { value: 1, label: "Décaissement" },
@@ -206,7 +218,7 @@ export const ENatureOperation = ({
         ]}
         columnId="value"
         columnDisplay="label"
-        value={item.sens}
+        value={item.Sensnature}
         addChange={changeHandler}
       />
       {children}

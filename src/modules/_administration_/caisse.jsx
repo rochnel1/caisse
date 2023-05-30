@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { OCaisse } from "./_init_";
 import {
   TFormulaire,
@@ -9,110 +9,195 @@ import {
   TFormList,
   TSelect,
 } from "../../utils/__";
+import { ENDPOINTS } from "../../utils/Variables";
+import { api } from "../../utils/api";
 
 export const Caisses = ({ children }) => {
-  const [items, setItems] = useState([
-    { c1: 1, c2: 2, c3: 3, c4: 4 },
-    { c1: 1, c2: 2, c3: 3, c4: 4 },
-  ]);
+  const [items, setItems] = useState([]);
   //
-  const [open, setOpen] = useState({ caisse: false });
+  const [open, setOpen] = useState({ caisse: false, Idcaisse: 0 });
+  const [refresh, setRefresh] = useState(false);
 
   const add = (e) => {
-    setOpen({ ...open, caisse: true });
+    setOpen({ ...open, caisse: true, Idcaisse: 0 });
   };
 
   const print = (e) => {
     // setOpen({ ...open, groupe: true });
     console.log("Impression");
   };
-  const remove = (e) => {
-    // setOpen({ ...open, groupe: true });
-    console.log("Suppression");
+  const modify = (id) => {
+    setOpen({ ...open, caisse: true, Idcaisse: id });
   };
 
   const quit = (e) => {
     setOpen({ ...open, caisse: false });
   };
 
+  //
+  const setBabalScript = (bab) => {
+    return <>{bab}</>;
+  };
+
+  //hooks
+  const rafraichir = () => {
+    setRefresh(!refresh);
+  };
+
+  const loadItems = () => {
+    api(ENDPOINTS.caisses)
+      .fetch()
+      .then((res) => setItems(res.data))
+      .catch((err) => alert(err));
+  };
+
+  useEffect(() => {
+    loadItems();
+  }, [refresh]);
+
   return (
     <>
       <TFormList
         title="Liste des Caisses"
-        options={<TValidationButton add={add} print={print} remove={remove} />}
+        options={
+          <TValidationButton add={add} print={print} refresh={rafraichir} />
+        }
       >
         <TTable
           items={items}
-          columns={["c1", "c2", "c3", "c4"]}
+          columns={[
+            { name: "Codecaisse" },
+            { name: "Descriptioncaisse" },
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdcompteNavigation?.Numcompte),
+            },
+            { name: "JournalComptable" },
+          ]}
           columnsDisplay={[
             "Code",
             "Description",
             "Compte Général",
             "Journal Comptable",
           ]}
-          // columnsWidth={["120px", "auto"]}
+          lineClick={(o) => {
+            modify(o.Idcaisse);
+          }}
         ></TTable>
       </TFormList>
       {open.caisse && (
         <TModal>
-          <ECaisse addQuiHandler={quit} />
+          <ECaisse
+            itemId={open.Idcaisse}
+            addQuiHandler={quit}
+            addRefreshHandler={rafraichir}
+          />
         </TModal>
       )}
     </>
   );
 };
 
-export const ECaisse = ({ children, addQuiHandler }) => {
-  const [itemCaisse, setItemCaisse] = useState(OCaisse);
+export const ECaisse = ({
+  children,
+  addQuiHandler,
+  itemId = 0,
+  addRefreshHandler,
+}) => {
+  const [item, setItem] = useState(OCaisse);
   const changeHandler = (e) => {
-    setItemCaisse({ ...itemCaisse, [e.target.name]: e.target.value });
+    setItem({ ...item, [e.target.name]: e.target.value });
   };
-  const save = (e) => {
-    console.log(itemCaisse);
+  const save = async (e) => {
+    console.log(item);
+
+    if (item.Idcaisse === 0) {
+      //nouvel enregistrement
+      delete item.Idcaisse;
+      await api(ENDPOINTS.caisses).post(item);
+    } else {
+      //modification
+      await api(ENDPOINTS.caisses).put(item.Idcaisse, item);
+    }
+    setItem({ ...OCaisse });
+    if (addRefreshHandler) addRefreshHandler();
+    if (addQuiHandler) addQuiHandler();
   };
+
+  const remove = async (e) => {
+    if (item.Idcaisse === 0) return;
+    const res = await api(ENDPOINTS.caisses).delete(item.Idcaisse, item);
+    if (addRefreshHandler) addRefreshHandler(res);
+    if (addQuiHandler) addQuiHandler();
+  };
+
+  const [compte, setCompte] = useState([]);
+
+  const loadItems = () => {
+    api(ENDPOINTS.compteGenerals)
+      .fetch()
+      .then((res) => setCompte(res.data))
+      .catch((err) => alert(err));
+  };
+
+  useEffect(() => {
+    setItem({ ...OCaisse });
+    if (itemId !== 0) {
+      api(ENDPOINTS.caisses)
+        .fetchById(itemId)
+        .then((res) => setItem(res.data))
+        .catch((err) => alert(err));
+    }
+    loadItems();
+  }, []);
 
   return (
     <TFormulaire
       title="Nouvelle Caisse"
-      valPanel={<TValidationButton add={save} cancel={addQuiHandler} />}
+      valPanel={
+        <TValidationButton
+          add={save}
+          remove={(e) => (item.Idcaisse !== 0 ? remove() : undefined)}
+          cancel={addQuiHandler}
+        />
+      }
     >
       <TInput
         label="Code"
-        name="code"
-        value={itemCaisse.code}
+        name="Codecaisse"
+        value={item.Codecaisse}
         maxlength={60}
         addChange={changeHandler}
       />
       <TInput
         label="Description"
-        name="description"
-        value={itemCaisse.description}
+        name="Descriptioncaisse"
+        value={item.Descriptioncaisse}
         maxlength={60}
         addChange={changeHandler}
       />
 
       <TSelect
         label="Compte Général"
-        name="compteGeneral"
-        items={[
-          { value: false, label: "CAIS" },
-          // { value: true, label: "Oui" },
-        ]}
-        columnId="value"
-        columnDisplay="label"
-        value={itemCaisse.compteGeneral}
+        name="Idcompte"
+        items={compte}
+        columnId="Idcompte"
+        columnDisplay="Numcompte"
+        value={item.IdcompteNavigation}
         addChange={changeHandler}
       />
       <TSelect
         label="Journal Comptable"
-        name="journalCompta"
+        name="JournalComptable"
         items={[
-          { value: false, label: "57xxxx" },
-          // { value: true, label: "Oui" },
+          { value: "CAIS_PRINCIPALE", label: "CAIS_PRINCIPALE" },
+          { value: "CAIS1", label: "CAIS1" },
+          { value: "CAIS2", label: "CAIS2" },
+          { value: "CAIS3", label: "CAIS2" },
         ]}
         columnId="value"
         columnDisplay="label"
-        value={itemCaisse.journalCompta}
+        value={item.JournalComptable}
         addChange={changeHandler}
       />
       {children}

@@ -18,13 +18,13 @@ export const PlanComptable = () => {
   const [refresh, setRefresh] = useState(false);
   const [open, setOpen] = useState({
     planComptable: false,
-    idcompte: 0,
+    Idcompte: 0,
   });
   const add = (e) => {
-    setOpen({ ...open, planComptable: true, idcompte: 0 });
+    setOpen({ ...open, planComptable: true, Idcompte: 0 });
   };
   const modify = (id) => {
-    setOpen({ ...open, planComptable: true, idcompte: id });
+    setOpen({ ...open, planComptable: true, Idcompte: id });
   };
 
   const print = (e) => {
@@ -62,17 +62,17 @@ export const PlanComptable = () => {
       >
         <TTable
           items={items}
-          columns={[{ name: "numcompte" }, { name: "intitule" }]}
+          columns={[{ name: "Numcompte" }, { name: "Intitule" }]}
           columnsDisplay={["N° de Compte", "Intitulé"]}
           lineClick={(o) => {
-            modify(o.idcompte);
+            modify(o.Idcompte);
           }}
         ></TTable>
       </TFormList>
       {open.planComptable && (
         <TModal>
           <EPlanComptable
-            itemId={open.idcompte}
+            itemId={open.Idcompte}
             addQuiHandler={quit}
             addRefreshHandler={rafraichir}
           />
@@ -93,17 +93,17 @@ export const EPlanComptable = ({
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
-  console.log(item.idcompte);
+  console.log(item.Idcompte);
 
   const save = async (e) => {
-    if (item.idcompte === 0) {
+    if (item.Idcompte === 0) {
       //nouvel enregistrement
-      delete item.idcompte;
+      delete item.Idcompte;
       //console.log(item)
       await api(ENDPOINTS.compteGenerals).post(item);
     } else {
       //modification
-      await api(ENDPOINTS.compteGenerals).put(item.idcompte, item);
+      await api(ENDPOINTS.compteGenerals).put(item.Idcompte, item);
     }
     setItem({ ...OPlanComptable });
     if (addRefreshHandler) addRefreshHandler();
@@ -111,8 +111,8 @@ export const EPlanComptable = ({
   };
 
   const remove = async (e) => {
-    if (item.idcompte === 0) return;
-    const res = await api(ENDPOINTS.compteGenerals).delete(item.idcompte, item);
+    if (item.Idcompte === 0) return;
+    const res = await api(ENDPOINTS.compteGenerals).delete(item.Idcompte, item);
     if (addRefreshHandler) addRefreshHandler(res);
     if (addQuiHandler) addQuiHandler();
   };
@@ -134,7 +134,7 @@ export const EPlanComptable = ({
       valPanel={
         <TValidationButton
           add={save}
-          remove={(e) => (item.idcompte !== 0 ? remove() : undefined)}
+          remove={(e) => (item.Idcompte !== 0 ? remove() : undefined)}
           cancel={addQuiHandler}
         />
       }
@@ -142,15 +142,15 @@ export const EPlanComptable = ({
       <TLayout cols="1fr 1fr">
         <TInput
           label="N° de compte"
-          name="numcompte"
-          value={item.numcompte}
+          name="Numcompte"
+          value={item.Numcompte}
           maxlength={60}
           addChange={changeHandler}
         />
         <TInput
           label="Intitulé"
-          name="intitule"
-          value={item.intitule}
+          name="Intitule"
+          value={item.Intitule}
           maxlength={60}
           addChange={changeHandler}
         />

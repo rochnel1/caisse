@@ -12,46 +12,47 @@ export const OGroupeUtilisateur = {
 };
 
 export const OCaisse = {
-  code: "",
-  description: "",
+  Idcaisse: 0,
+  Codecaisse: "",
+  Descriptioncaisse: "",
   compteGeneral: "",
-  journalCompta: "",
+  JournalComptable: "",
+  Idcompte: 0,
 };
 
 export const OPersonnel = {
-  code: "",
-  noms: "",
-  prenoms: "",
-  profils: "",
-  caisseAssocie: "",
+  Idpersonnel: 0,
+  Codepersonnel: "",
+  Nom: "",
+  Prenom: "",
+  Profil: "Caissier",
+  Idcaisse: 0,
 };
 
 export const ONatureOperation = {
-  idnatureoperation: 0,
-  idcompte: 0,
-  code: "",
-  description: "",
-  compteGeneralAssocie: "",
-  typeNature: "",
-  sens: "",
+  Idnatureoperation: 0,
+  Idcompte: 0,
+  Codenature: "",
+  Description: "",
+  TypeNature: 0,
+  Sensnature: 0,
 };
 
 export const OExercice = {
-  idexercice: 0,
-  code: "",
-  datedebut: "",
-  datefin: "",
-  statut: "",
-  cloture: "",
+  Idexercice: 0,
+  Code: "",
+  Datedebut: new Date(),
+  Datefin: new Date(),
+  Statut: false,
+  Cloture: false,
 };
 
 export const OPeriode = {
-  idperiode: 0,
-  exercice: "",
-  codeperiode: "",
-  datedebut: "",
-  datefin: "",
-  idexercice: 0,
+  Idperiode: 0,
+  Codeperiode: "",
+  Datedebut: new Date(),
+  Datefin: new Date(),
+  Idexercice: 0,
 };
 
 export const OComptabilisation = {
@@ -65,13 +66,12 @@ export const OComptabilisation = {
 };
 
 export const OInitBudget = {
-  exercice: "",
-  periode: "",
-  date_debut: "",
-  date_fin: "",
-  nature_operation: "",
-  montant: "",
-  sens: "",
+  Idbudget: 0,
+  Idnatureoperation: 0,
+  Idperiode: 0,
+  Idexercice: 0,
+  Montantbudget: 0,
+  Sensbudget: 0,
 };
 
 export const OGeneralite = {
@@ -120,26 +120,33 @@ export const OClotureCaisse = {
   date_cloture: "",
 };
 
-export const OEnregistrement = {
-  caisse: "",
-  caissier: "",
-  date_operation: "",
-  description_operation: "",
-  montant_operation: "",
-  sens: "",
-  exercice: "",
-  periode: "",
-  nature_operation: "",
-  compte_general_associe: "",
-  compte_caisse: "",
-  etat: "",
+export const OOperation = {
+  IdOperation: 0,
+  Idcaisse: 0,
+  Idpersonnel: 0,
+  Idexercice: 0,
+  Idperiode: 0,
+  Idnatureoperation: 0,
+  Dateoperation: new Date(),
+  Description: "",
+  Montant: "",
+  Sens: "",
+  Etat: "",
+  Nbrecontrole: "",
+  Controlerpar: "",
+  Comptabilserpar: "",
+  Datecontrole: "",
+  Datecloture: "",
+  Datecomptabilisation: "",
+  Cloturepar: "",
 };
 
 export const OPlanComptable = {
-  idcompte: 0,
-  numcompte: "",
-  intitule: "",
+  Idcompte: 0,
+  Numcompte: "",
+  Intitule: "",
 };
+
 export const OSuivRealisation = {
   exercice: "",
   periode: "",

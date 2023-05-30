@@ -44,7 +44,6 @@ export const Utilisateurs = ({ children }) => {
   };
 
   useEffect(() => {
-    // console.log("Code With Rochnel");
     loadItems();
   }, [refresh]);
 
@@ -108,7 +107,6 @@ export const EUtilisateur = ({
   };
 
   const save = async (e) => {
-    console.log(item);
     if (item.IdUtilisateur === 0) {
       //nouvel enregistrement
       delete item.IdUtilisateur;
@@ -190,12 +188,12 @@ export const EUtilisateur = ({
       </TLayout>
 
       <TSelect
-        label="groupe d'utilisateur"
-        name="idgpeutilisateur"
+        label="Groupe d'utilisateur"
+        name="Idgpeutilisateur"
         items={groupes}
-        columnId="idgpeutilisateur"
+        columnId="Idgpeutilisateur"
         columnDisplay="Nomgroupe"
-        value={item.Idgpeutilisateur}
+        value={(item.Idgpeutilisateur = "Aucun")}
         addChange={changeHandler}
       />
       {children}

@@ -11,10 +11,6 @@ import { OGroupeUtilisateur } from "./_init_";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
 
-/*const instance = axios.create();
-instance.defaults.headers.common["Content-Type"] =
-  "application/json; charset=utf-8";*/
-
 export const GroupesUtilisateurs = ({ children }) => {
   const [items, setItems] = useState([]);
 
@@ -147,7 +143,7 @@ export const EGroupeUtilisateur = ({
     >
       <TInput
         label="Nom du groupe"
-        name="nomgroupe"
+        name="Nomgroupe"
         value={itemGrp.Nomgroupe}
         maxlength={60}
         addChange={changeHandler}

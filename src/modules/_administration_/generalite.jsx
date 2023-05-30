@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   TFormList,
   TFormulaire,
@@ -7,28 +7,25 @@ import {
   TValidationButton,
 } from "../../utils/__";
 import { OGeneralite } from "./_init_";
+import { ENDPOINTS } from "../../utils/Variables";
+import { api } from "../../utils/api";
 
 export const Generalite = ({ children }) => {
-  const [items, setItems] = useState([
-    {
-      c1: "GROUPE SIA",
-      c2: "Groupe Système Informatique & application",
-      c3: "Elig Essoono",
-      c4: "Yaoundé",
-      c5: "Center",
-      c6: "Cameroun",
-      c7: "FCFA",
-      c8: "###",
-      c9: "MxxxxxxP",
-      c10: "RCCM/YAO/",
-      c11: "+237 6",
-      c12: "contact@groupesia.com",
-      c13: "groupesia.com",
-    },
-  ]);
+  const [items, setItems] = useState([]);
   //
-  const [open, setOpen] = useState({ utilisateur: false });
 
+  const [refresh, setRefresh] = useState(false);
+
+  const loadGeneralite = () => {
+    api(ENDPOINTS.generalite)
+      .fetch()
+      .then((res) => setItems(res.data))
+      .catch((err) => alert(err));
+  };
+  useEffect(() => {
+    // console.log("Code With Rochnel");
+    loadGeneralite();
+  }, []);
   return (
     <>
       <EGeneralite />
@@ -41,10 +38,11 @@ export const EGeneralite = ({ children }) => {
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
-  const groupe = (e) => {
-    // setOpen({ ...open, groupe: true });
-    console.log("Save ");
+
+  const save = (e) => {
+    // setOpen({ ...open, generalite: true, Idgeneralite: 0 });
   };
+
   const print = (e) => {
     // setOpen({ ...open, groupe: true });
     console.log("Imprimer ");
@@ -155,7 +153,7 @@ export const EGeneralite = ({ children }) => {
           />
         </TLayout>
       </TFormulaire>
-      <TValidationButton print={print} save={groupe} />
+      <TValidationButton print={print} save={save} />
     </div>
   );
 };
