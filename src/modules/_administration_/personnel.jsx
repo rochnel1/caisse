@@ -109,9 +109,7 @@ export const EPersonnel = ({
     } else if (item.Profil === "1") {
       item.Profil = "Contrôleur";
     } else if (item.Profil === "2") {
-      item.Profil = "Clôtureur";
-    } else if (item.Profil === "3") {
-      item.Profil = "Comptabilisateur";
+      item.Profil = "Comptable";
     } else {
       item.Profil = "";
     }
@@ -196,8 +194,7 @@ export const EPersonnel = ({
         items={[
           { value: 0, label: "Caissier" },
           { value: 1, label: "Contrôleur" },
-          { value: 2, label: "Clôtureur" },
-          { value: 3, label: "Comptabilisateur" },
+          { value: 2, label: "Comptable" },
         ]}
         columnId="value"
         columnDisplay="label"

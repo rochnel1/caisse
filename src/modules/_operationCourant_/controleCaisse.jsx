@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   TFormList,
   TFormulaire,
@@ -9,24 +9,12 @@ import {
   TTable,
   TValidationButton,
 } from "../../utils/__";
-import { OControleCaisse } from "../_administration_/_init_";
+import { OOperation } from "../_administration_/_init_";
+import { ENDPOINTS } from "../../utils/Variables";
+import { api } from "../../utils/api";
 
 export const ControleCaisse = ({ children }) => {
-  const [items, setItem] = useState([
-    {
-      c1: "CAISSE_PRINCIPALE",
-      c2: "25/04/2023",
-      c3: "Rochnel",
-      c4: "Charline",
-      c5: "85000",
-      c6: "84000",
-      c7: "-1000",
-      c8: "oui",
-      c9: "PERTE_SUR_CTRL",
-      c10: "47xxx",
-      c11: "57xxxx",
-    },
-  ]);
+  const [items, setItem] = useState([]);
 
   const [open, setOpen] = useState({ controleCaisse: false });
   const add = (e) => {
@@ -43,6 +31,25 @@ export const ControleCaisse = ({ children }) => {
   const quit = (e) => {
     setOpen({ ...open, controleCaisse: false });
   };
+
+  const loadItems = (etat) => {
+    api(ENDPOINTS.operationsEtat)
+      .fetchById()
+      .then((res) => setItem(res.data))
+      .catch((err) => alert(err));
+  };
+
+  useEffect(() => {
+    // Récupération de la chaîne JSON depuis le localStorage
+    let etat = "OP";
+    loadItems(etat);
+  }, []);
+
+  //
+  const setBabalScript = (bab) => {
+    return <>{bab}</>;
+  };
+
   return (
     <>
       <TFormList
@@ -58,17 +65,27 @@ export const ControleCaisse = ({ children }) => {
         <TTable
           items={items}
           columns={[
-            "c1",
-            "c2",
-            "c3",
-            "c4",
-            "c5",
-            "c6",
-            "c7",
-            "c8",
-            "c9",
-            "c10",
-            "c11",
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdcaisseNavigation?.Codecaisse),
+            },
+            { name: "Datecontrole" },
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdcaisseNavigation?.Codecaisse),
+            },
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdcaisseNavigation?.Codecaisse),
+            },
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdcaisseNavigation?.Codecaisse),
+            },
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdcaisseNavigation?.Codecaisse),
+            },
           ]}
           columnsDisplay={[
             "Caisse",
@@ -96,60 +113,57 @@ export const ControleCaisse = ({ children }) => {
 };
 
 export const EControleCaisse = ({ children, addQuiHandler }) => {
-  const [item, setItem] = useState(OControleCaisse);
+  const [item, setItem] = useState(OOperation);
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
-  const save = (e) => {
-    console.log(item);
+  const save = (e) => {};
+
+  const [nature, setNature] = useState([]);
+  const [personnel, setPersonnel] = useState([]);
+
+  const loadItemsNature = () => {
+    api(ENDPOINTS.natureoperations)
+      .fetch()
+      .then((res) => setNature(res.data))
+      .catch((err) => alert(err));
   };
+
+  useEffect(() => {
+    // Récupération de la chaîne JSON depuis le localStorage
+    const objString = localStorage.getItem("myData");
+    const obj = JSON.parse(objString);
+
+    item.Idcaisse = obj.caisse;
+    item.Idexercice = obj.exercice;
+    item.Idperiode = obj.periode;
+    item.Idpersonnel = obj.personel;
+
+    setItem({ ...OOperation });
+    loadItemsNature();
+  }, []);
+
   return (
     <TFormulaire
       title="Contrôle de l'opération de caisse"
       valPanel={<TValidationButton save={save} cancel={addQuiHandler} />}
     >
-      <TLayout cols="1fr 1fr 1fr 1fr">
-        <TSelect
-          label="Caisse"
-          name="caisse"
-          items={[{ value: false, label: "CAISSE_PRINCIPALE" }]}
-          columnId="value"
-          columnDisplay="label"
-          value={item.caisse}
-          maxlength={60}
-          addChange={changeHandler}
-        />
+      <TLayout cols="1fr 1fr">
         <TInput
           type="date"
           label="Date de contrôle"
-          name="date_controle"
-          value={item.date_controle}
+          name="Datecontrole"
+          value={item.Datecontrole}
           maxlength={60}
           addChange={changeHandler}
         />
         <TSelect
           label="Contrôle effectué par"
           name="controlle_effectue_par"
-          items={[
-            { value: false, label: "NOUDI" },
-            { value: true, label: "ROCHNEL" },
-          ]}
-          columnId="value"
-          columnDisplay="label"
-          value={item.controlle_effectue_par}
-          maxlength={60}
-          addChange={changeHandler}
-        />
-        <TSelect
-          label="Caissier"
-          name="caissier"
-          items={[
-            { value: false, label: "Charline" },
-            { value: true, label: "Phirmin" },
-          ]}
-          columnId="value"
-          columnDisplay="label"
-          value={item.caissier}
+          items={personnel}
+          columnId="Idpersonnel"
+          columnDisplay="Codepersonnel"
+          value={item.Idpersonnel}
           maxlength={60}
           addChange={changeHandler}
         />
@@ -159,23 +173,23 @@ export const EControleCaisse = ({ children, addQuiHandler }) => {
         <TInput
           type="number"
           label="Montant théorique"
-          name="montant_theorique"
-          value={(item.montant_theorique = "85000")}
+          name="Montant"
+          value={item.Montant}
           maxlength={60}
           addChange={changeHandler}
         />
         <TInput
           type="number"
           label="Montant physique"
-          name="montant_physique"
-          value={(item.montant_physique = "84000")}
+          name="Montant"
+          value={item.Montant}
           maxlength={60}
           addChange={changeHandler}
         />
         <TInput
           label="Ecart"
           name="ecart"
-          value={item.ecart}
+          // value={item.ecart}
           maxlength={60}
           addChange={changeHandler}
         />
@@ -183,8 +197,8 @@ export const EControleCaisse = ({ children, addQuiHandler }) => {
           label="Regularisation "
           name="regularisation"
           items={[
-            { value: false, label: "Non" },
-            { value: true, label: "Oui" },
+            { value: -1, label: "Non" },
+            { value: 1, label: "Oui" },
           ]}
           columnId="value"
           columnDisplay="label"
@@ -194,27 +208,10 @@ export const EControleCaisse = ({ children, addQuiHandler }) => {
         <TSelect
           label="Nature de regularisation "
           name="nature_regularisation"
-          items={[
-            { value: false, label: "PERTE_SUR_CTRL" },
-            { value: true, label: "GAIN_SUR_CTRL" },
-          ]}
+          // items={}
           columnId="value"
           columnDisplay="label"
           value={item.nature_regularisation}
-          addChange={changeHandler}
-        />
-        <TInput
-          label="Compte général associé"
-          name="compte_general_associe"
-          value={(item.compte_general_associe = "47xxxx")}
-          maxlength={60}
-          addChange={changeHandler}
-        />
-        <TInput
-          label="Compte caisse"
-          name="compte_caisse"
-          value={(item.compte_caisse = "57xxxx")}
-          maxlength={60}
           addChange={changeHandler}
         />
       </TLayout>

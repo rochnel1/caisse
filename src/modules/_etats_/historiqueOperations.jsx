@@ -1,23 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TFormList, TTable } from "../../utils/__";
+import { ENDPOINTS } from "../../utils/Variables";
+import { api } from "../../utils/api";
 
 export const HistoriqueOperations = ({ children }) => {
-  const [items, setItems] = useState([
-    {
-      c1: "CAISSE_PRINCIPALE",
-      c2: "Charline",
-      c3: "01/04/2023",
-      c4: "Paiement Frais de taxi",
-      c5: 5000,
-      c6: "Décaissement",
-      c7: 2023,
-      c8: "Avril",
-      c9: "FRAIS_TAXI",
-      c10: "6310xxxx",
-      c11: "57xxxx",
-      c12: "CPTA",
-    },
-  ]);
+  const [items, setItems] = useState([]);
+  const [refresh, setRefresh] = useState(false);
+
+  //hooks
+  const rafraichir = () => {
+    setRefresh(!refresh);
+  };
+
+  const loadItems = () => {
+    api(ENDPOINTS.operations)
+      .fetch()
+      .then((res) => setItems(res.data))
+      .catch((err) => alert(err));
+  };
+
+  useEffect(() => {
+    loadItems();
+  }, [refresh]);
+
+  //
+  const setBabalScript = (bab) => {
+    return <>{bab}</>;
+  };
+
   return (
     <>
       <TFormList
@@ -27,18 +37,43 @@ export const HistoriqueOperations = ({ children }) => {
         <TTable
           items={items}
           columns={[
-            "c1",
-            "c2",
-            "c3",
-            "c4",
-            "c5",
-            "c6",
-            "c7",
-            "c8",
-            "c9",
-            "c10",
-            "c11",
-            "c12",
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdcaisseNavigation?.Codecaisse),
+            },
+            {
+              name: "",
+              render: (o) =>
+                setBabalScript(o.IdpersonnelNavigation?.Codepersonnel),
+            },
+            {
+              name: "Dateoperation",
+              render: (o) => new Date(o.Dateoperation).toLocaleString(),
+            },
+            { name: "Description" },
+            { name: "Montant" },
+            { name: "Sens" },
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdexerciceNavigation?.Code),
+            },
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdperiodeNavigation?.Codeperiode),
+            },
+            {
+              name: "",
+              render: (o) =>
+                setBabalScript(o.IdnatureoperationNavigation?.Codenature),
+            },
+            {
+              name: "",
+              render: (o) =>
+                setBabalScript(
+                  o.IdcaisseNavigation?.IdcompteNavigation?.Numcompte
+                ),
+            },
+            { name: "Etat" },
           ]}
           columnsDisplay={[
             "Caisse",
@@ -50,7 +85,6 @@ export const HistoriqueOperations = ({ children }) => {
             "Exercice",
             "Période",
             "Nature d'opération",
-            "Compte général associé",
             "Compte de caisse",
             "Etat",
           ]}

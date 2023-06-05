@@ -16,7 +16,30 @@
   font-size: 2rem;
   color: #888;
 }
-
+.success-message {
+  display: flex;
+  flex-direction: column;
+  font-size: 2rem;
+  color: #0aab1a;
+  align-items: center;
+  justify-content: center;
+}
+.close-message {
+  display: flex;
+  flex-direction: column;
+  font-size: 2rem;
+  color: #d52424;
+  align-items: center;
+  justify-content: center;
+}
+.none-message {
+  display: flex;
+  flex-direction: column;
+  font-size: 2rem;
+  color: #737373;
+  align-items: center;
+  justify-content: center;
+}
 html,
 body,
 #root {

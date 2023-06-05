@@ -107,6 +107,7 @@ export const EUtilisateur = ({
   };
 
   const save = async (e) => {
+    //console.log(item.Idgpeutilisateur);
     if (item.IdUtilisateur === 0) {
       //nouvel enregistrement
       delete item.IdUtilisateur;
@@ -129,8 +130,6 @@ export const EUtilisateur = ({
     if (addRefreshHandler) addRefreshHandler(res);
     if (addQuiHandler) addQuiHandler();
   };
-
-  //
   const [groupes, setGroupes] = useState([]);
 
   const loadItems = () => {
@@ -151,6 +150,11 @@ export const EUtilisateur = ({
     }
     loadItems();
   }, []);
+
+  const state = {
+    options: [],
+    defaultValue: "Choisissez une option",
+  };
 
   return (
     <TFormulaire
@@ -193,7 +197,7 @@ export const EUtilisateur = ({
         items={groupes}
         columnId="Idgpeutilisateur"
         columnDisplay="Nomgroupe"
-        value={(item.Idgpeutilisateur = "Aucun")}
+        value={item.Idgpeutilisateur}
         addChange={changeHandler}
       />
       {children}

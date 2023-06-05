@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TFormulaire,
   TLayout,
@@ -6,110 +6,160 @@ import {
   TTable,
   TValidationButton,
 } from "../../utils/__";
-import { OSuivRealisation } from "../_administration_/_init_";
+import { OInitBudget } from "../_administration_/_init_";
+import { api } from "../../utils/api";
+import { ENDPOINTS } from "../../utils/Variables";
 
-export const SuiviRealisations = ({ children }) => {
-  const [open, setOpen] = useState({ utilisateur: false });
+export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
+  const [items, setItems] = useState([]);
+  const [refresh, setRefresh] = useState(false);
+  const [item, setItem] = useState(OInitBudget);
 
-  const quit = (e) => {
-    setOpen({ ...open, utilisateur: false, groupe: false });
-  };
-
-  return (
-    <>
-      <ESuiviRealisations addQuiHandler={quit} />
-    </>
-  );
-};
-
-export const ESuiviRealisations = ({ children }) => {
-  const [item, setItem] = useState(OSuivRealisation);
-  const [itemsSuivi, setItemsSuivi] = useState([
-    {
-      c1: 2021,
-      c2: "Mai",
-      c7: 75000,
-      c8: 75000,
-      c9: 0,
-      c10: "100%",
-    },
-  ]);
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
-  const validate = (e) => {
-    // setOpen({ ...open, groupe: true });
-    console.log("Rechercher ");
+
+  //hooks
+  const rafraichir = () => {
+    setRefresh(!refresh);
+  };
+
+  const loadItems = () => {
+    api(ENDPOINTS.budgetsRealisation)
+      .fetch()
+      .then((res) => {
+        setItems(res.data);
+      })
+      .catch((err) => alert(err));
+  };
+
+  const loadItemsFliter = (idExo, idPer, idNat) => {
+    if (idExo == 0 || idPer == 0 || idNat == 0) {
+      setItems([]);
+      return;
+    }
+    api(ENDPOINTS.budgetsRealisation)
+      .fetchByIds(idExo, idPer, idNat)
+      .then((res) => setItems(res.data))
+      .catch((err) => alert(err));
+  };
+
+  const validate = async (e) => {
+    idExo = item.Idexercice;
+    idPer = item.Idperiode;
+    idNat = item.Idnatureoperation;
+    loadItemsFliter(idExo, idPer, idNat);
+  };
+  const displayAll = async (e) => {
+    loadItems();
   };
   const print = (e) => {
-    // setOpen({ ...open, groupe: true });
-    console.log("Imprimer ");
+    idExo = item.Idexercice;
+    idPer = item.Idperiode;
+    idNat = item.Idnatureoperation;
+    console.log(idExo + " + " + idPer + " + " + idNat);
   };
+
+  const [exercice, setExercice] = useState([]);
+  const [nature, setNature] = useState([]);
+  const [periode, setPeriode] = useState([]);
+
+  const loadItemsExercice = () => {
+    api(ENDPOINTS.exercices)
+      .fetch()
+      .then((res) => setExercice(res.data))
+      .catch((err) => alert(err));
+  };
+
+  const loadItemsPeriode = () => {
+    api(ENDPOINTS.periodes)
+      .fetch()
+      .then((res) => setPeriode(res.data))
+      .catch((err) => alert(err));
+  };
+
+  const loadItemsNature = () => {
+    api(ENDPOINTS.natureoperations)
+      .fetch()
+      .then((res) => setNature(res.data))
+      .catch((err) => alert(err));
+  };
+
+  useEffect(() => {
+    // setItem({ ...OInitBudget });
+    loadItemsNature();
+    loadItemsExercice();
+    loadItemsPeriode();
+  }, []);
+
+  useEffect(() => {
+    loadItems();
+  }, []);
+
   return (
-    <div>
-      <TFormulaire title="Cliquer sur valider pour voir le resultat ">
-        <TLayout cols="1fr 1fr 1fr">
-          <TSelect
-            label="Exercice"
-            name="exercice"
-            items={[
-              { value: false, label: "2020" },
-              { value: true, label: "2021" },
-              { value: true, label: "2022" },
-            ]}
-            columnId="value"
-            columnDisplay="label"
-            value={item.exercice}
-            maxlength={60}
-            addChange={changeHandler}
+    <>
+      <div>
+        <TFormulaire title="Suivi des réalisations ">
+          <TLayout cols="1fr 1fr 1fr">
+            <TSelect
+              label="Exercice"
+              name="Idexercice"
+              items={exercice}
+              columnId="Idexercice"
+              columnDisplay="Code"
+              value={item.Idexercice}
+              addChange={changeHandler}
+            />
+            <TSelect
+              label="Periode"
+              name="Idperiode"
+              items={periode}
+              columnId="Idperiode"
+              columnDisplay="Codeperiode"
+              value={item.Idperiode}
+              addChange={changeHandler}
+            />
+
+            <TSelect
+              label="Nature d'opération"
+              name="Idnatureoperation"
+              items={nature}
+              columnId="Idnatureoperation"
+              columnDisplay="Codenature"
+              value={item.Idnatureoperation}
+              addChange={changeHandler}
+            />
+          </TLayout>
+        </TFormulaire>
+
+        <div className="center-TValidationButton">
+          <TValidationButton
+            print={print}
+            validate={validate}
+            all={displayAll}
           />
-          <TSelect
-            label="Periode"
-            name="periode"
-            items={[
-              { value: false, label: "Avril" },
-              { value: true, label: "Mai" },
-              { value: true, label: "Juin" },
-              { value: true, label: "Tous" },
-            ]}
-            columnId="value"
-            columnDisplay="label"
-            value={item.periode}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-          <TSelect
-            label="Nature d'opération"
-            name="nature_operation"
-            items={[
-              { value: false, label: "FRAIS_ELECTRICITE" },
-              { value: true, label: "FRAIS_TAXI" },
-              { value: true, label: "LOYER" },
-              { value: true, label: "Tous" },
-            ]}
-            columnId="value"
-            columnDisplay="label"
-            value={item.nature_operation}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-        </TLayout>
-      </TFormulaire>
-      <TValidationButton validate={validate} print={print} />
+        </div>
+      </div>
 
       <TTable
-        items={itemsSuivi}
-        columns={["c1", "c2", "c7", "c8", "c9", "c10"]}
+        items={items}
+        columns={[
+          { name: "exercice" },
+          { name: "periode" },
+          { name: "nature" },
+          { name: "prevision" },
+          { name: "realisation" },
+          { name: "ecart" },
+        ]}
         columnsDisplay={[
           "Exercice",
           "Période",
-          "Montant (prévision)",
+          "Nature",
+          "Prévision",
           "Réalisations",
           "Ecart",
-          "Pourcentage de réalisation",
         ]}
-        // columnsWidth={["120px", "auto"]}
       ></TTable>
-    </div>
+    </>
   );
 };

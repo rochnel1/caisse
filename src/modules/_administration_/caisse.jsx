@@ -186,18 +186,12 @@ export const ECaisse = ({
         value={item.IdcompteNavigation}
         addChange={changeHandler}
       />
-      <TSelect
+      <TInput
         label="Journal Comptable"
         name="JournalComptable"
-        items={[
-          { value: "CAIS_PRINCIPALE", label: "CAIS_PRINCIPALE" },
-          { value: "CAIS1", label: "CAIS1" },
-          { value: "CAIS2", label: "CAIS2" },
-          { value: "CAIS3", label: "CAIS2" },
-        ]}
-        columnId="value"
-        columnDisplay="label"
+        items={item.JournalComptable}
         value={item.JournalComptable}
+        maxlength={5}
         addChange={changeHandler}
       />
       {children}

@@ -12,6 +12,8 @@ import {
 import { OOperation, OOuvertureCaisse } from "../_administration_/_init_";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
+import { RemoveCookie } from "../../utils/removeCookies";
+import { SetCookie } from "../../utils/setCookies";
 
 export const OuvertureCaisse = ({ children }) => {
   const [items, setItems] = useState([]);
@@ -19,14 +21,17 @@ export const OuvertureCaisse = ({ children }) => {
 
   const [open, setOpen] = useState({
     ouvertureCaisse: false,
-    IdOperation: 0,
+    Idoperation: 0,
   });
+
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
   const add = (e) => {
-    setOpen({ ...open, ouvertureCaisse: true, IdOperation: 0 });
+    setOpen({ ...open, ouvertureCaisse: true, Idoperation: 0 });
   };
 
   const modify = (id) => {
-    setOpen({ ...open, ouvertureCaisse: true, IdOperation: id });
+    setOpen({ ...open, ouvertureCaisse: true, Idoperation: id });
   };
 
   const print = (e) => {
@@ -45,25 +50,33 @@ export const OuvertureCaisse = ({ children }) => {
       .then((res) => setItems(res.data))
       .catch((err) => alert(err));
   };
+
   useEffect(() => {
     loadItems();
+    handleSave();
   }, [refresh]);
 
   const setBabalScript = (bab) => {
     return <>{bab}</>;
   };
+
   const quit = (e) => {
     setOpen({ ...open, ouvertureCaisse: false });
   };
+
+  const handleSave = () => {
+    const objString = localStorage.getItem("myData");
+    const obj = JSON.parse(objString);
+    obj !== null ? setShowSuccessMessage(true) : setShowSuccessMessage(false);
+  };
+
   return (
     <>
       <TFormList
-        title="Liste des caisses ouvertes"
-        options={
-          <TValidationButton add={add} print={print} refresh={rafraichir} />
-        }
+        title="Ouverture de Caisses"
+        options={<TValidationButton add={add} print={print} />}
       >
-        <TTable
+        {/* <TTable
           items={items}
           columns={[
             {
@@ -99,18 +112,27 @@ export const OuvertureCaisse = ({ children }) => {
             "Compte de caisse",
           ]}
           lineClick={(o) => {
-            modify(o.IdOperation);
+            modify(o.Idoperation);
           }}
-        ></TTable>
+        ></TTable> */}
       </TFormList>
       {open.ouvertureCaisse && (
         <TModal>
           <EOuvertureCaisse
             addQuiHandler={quit}
-            itemId={open.IdOperation}
+            itemId={open.Idoperation}
             addRefreshHandler={rafraichir}
+            displayMessage={handleSave}
           />
         </TModal>
+      )}
+      <br />
+
+      {showSuccessMessage && (
+        <div className="success-message">Caisse Ouverte !</div>
+      )}
+      {!showSuccessMessage && (
+        <div className="none-message">Aucune Caisse n'est ouverte !</div>
       )}
     </>
   );
@@ -121,6 +143,7 @@ export const EOuvertureCaisse = ({
   addQuiHandler,
   itemId = 0,
   addRefreshHandler,
+  displayMessage,
 }) => {
   const [item, setItem] = useState(OOperation);
 
@@ -129,31 +152,67 @@ export const EOuvertureCaisse = ({
   };
 
   const save = async (e) => {
-    console.log(item);
-    if (item.IdOperation === 0) {
+    if (item.Idoperation === 0) {
       //nouvel enregistrement
       delete item.IdUtilisateur;
-      await api(ENDPOINTS.operations).post(item);
+      // await api(ENDPOINTS.operations).post(item);
+
+      // Enregistrement de l'objet dans le localStorage
+      const obj = {
+        caisse: item.Idcaisse,
+        personel: item.Idpersonnel,
+        exercice: item.Idexercice,
+        periode: item.Idperiode,
+      };
+
+      localStorage.setItem("myData", JSON.stringify(obj));
+      //SetCookie("caisseData", JSON.stringify(obj));
     } else {
       //modification
-      await api(ENDPOINTS.operations).put(item.IdOperation, item);
+      await api(ENDPOINTS.operations).put(item.Idoperation, item);
     }
     setItem({ ...OOperation });
     if (addRefreshHandler) addRefreshHandler();
     if (addQuiHandler) addQuiHandler();
+    if (displayMessage) displayMessage();
   };
 
   const remove = async (e) => {
-    if (item.IdOperation === 0) return;
-    const res = await api(ENDPOINTS.operations).delete(item.IdOperation, item);
+    if (item.Idoperation === 0) return;
+    const res = await api(ENDPOINTS.operations).delete(item.Idoperation, item);
     if (addRefreshHandler) addRefreshHandler(res);
     if (addQuiHandler) addQuiHandler();
   };
 
   const [caisse, setCaisse] = useState([]);
-  const [personne, setPersonne] = useState([]);
+  const [personne, setPersonnel] = useState([]);
   const [exercice, setExercice] = useState([]);
   const [periode, setPeriode] = useState([]);
+
+  const loadItemsExercice = () => {
+    api(ENDPOINTS.exercices)
+      .fetch()
+      .then((res) => setExercice(res.data))
+      .catch((err) => alert(err));
+  };
+  const loadItemsPeriode = () => {
+    api(ENDPOINTS.periodes)
+      .fetch()
+      .then((res) => setPeriode(res.data))
+      .catch((err) => alert(err));
+  };
+  const loadItemsCaisse = () => {
+    api(ENDPOINTS.caisses)
+      .fetch()
+      .then((res) => setCaisse(res.data))
+      .catch((err) => alert(err));
+  };
+  const loadItemsPersonnel = () => {
+    api(ENDPOINTS.personnels)
+      .fetch()
+      .then((res) => setPersonnel(res.data))
+      .catch((err) => alert(err));
+  };
 
   useEffect(() => {
     setItem({ ...OOperation });
@@ -163,6 +222,10 @@ export const EOuvertureCaisse = ({
         .then((res) => setItem(res.data))
         .catch((err) => alert(err));
     }
+    loadItemsExercice();
+    loadItemsPeriode();
+    loadItemsCaisse();
+    loadItemsPersonnel();
   }, []);
 
   return (
@@ -171,7 +234,7 @@ export const EOuvertureCaisse = ({
       valPanel={
         <TValidationButton
           save={save}
-          remove={(e) => (item.IdOperation !== 0 ? remove() : undefined)}
+          remove={(e) => (item.Idoperation !== 0 ? remove() : undefined)}
           cancel={addQuiHandler}
         />
       }

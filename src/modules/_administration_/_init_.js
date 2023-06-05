@@ -34,7 +34,7 @@ export const ONatureOperation = {
   Idcompte: 0,
   Codenature: "",
   Description: "",
-  TypeNature: 0,
+  Typenature: 0,
   Sensnature: 0,
 };
 
@@ -98,20 +98,6 @@ export const OOuvertureCaisse = {
   compte_caisse: "",
 };
 
-export const OControleCaisse = {
-  caisse: "",
-  date_controle: "",
-  controlle_effectue_par: "",
-  caissier: "",
-  montant_theorique: "",
-  montant_physique: "",
-  ecart: "",
-  regularisation: "",
-  nature_regularisation: "",
-  compte_general_associe: "",
-  compte_caisse: "",
-};
-
 export const OClotureCaisse = {
   caisse: "",
   cloture_par: "",
@@ -121,7 +107,7 @@ export const OClotureCaisse = {
 };
 
 export const OOperation = {
-  IdOperation: 0,
+  Idoperation: 0,
   Idcaisse: 0,
   Idpersonnel: 0,
   Idexercice: 0,
@@ -131,7 +117,7 @@ export const OOperation = {
   Description: "",
   Montant: "",
   Sens: "",
-  Etat: "",
+  Etat: "OP",
   Nbrecontrole: "",
   Controlerpar: "",
   Comptabilserpar: "",
@@ -145,9 +131,4 @@ export const OPlanComptable = {
   Idcompte: 0,
   Numcompte: "",
   Intitule: "",
-};
-
-export const OSuivRealisation = {
-  exercice: "",
-  periode: "",
 };

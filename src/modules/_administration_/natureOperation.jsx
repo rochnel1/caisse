@@ -64,8 +64,20 @@ export const NatureOperation = ({ children }) => {
               name: "",
               render: (o) => setBabalScript(o.IdcompteNavigation?.Numcompte),
             },
-            { name: "Typenature" },
-            { name: "Sensnature" },
+            {
+              name: "Typenature",
+              render: (o) =>
+                o.Typenature == 0 ? "Opération" : "Régularisation",
+            },
+            {
+              name: "Sensnature",
+              render: (o) =>
+                o.Sensnature == 0
+                  ? "Encaissement"
+                  : o.Sensnature == 1
+                  ? "Décaissement"
+                  : "Les deux",
+            },
           ]}
           columnsDisplay={[
             "Code",
@@ -105,20 +117,6 @@ export const ENatureOperation = ({
     setItem({ ...item, [e.target.name]: e.target.value });
   };
   const save = async (e) => {
-    if (item.Sensnature === 0) {
-      item.Sensnature = "Encaissement";
-    } else if (item.Sensnature === 1) {
-      item.Sensnature = "Décaissement";
-    } else {
-      item.Sensnature = "Les Deux";
-    }
-
-    item.TypeNature === 0
-      ? (item.TypeNature = "Opération")
-      : (item.TypeNature = "Régularisation");
-
-    console.log(item);
-
     if (item.Idnatureoperation === 0) {
       delete item.Idnatureoperation;
       await api(ENDPOINTS.natureoperations).post(item);
@@ -156,9 +154,14 @@ export const ENatureOperation = ({
     if (itemId !== 0) {
       api(ENDPOINTS.natureoperations)
         .fetchById(itemId)
-        .then((res) => setItem(res.data))
+        .then((res) => {
+          setItem(res.data);
+          console.log(res.data);
+        })
+
         .catch((err) => alert(err));
     }
+
     loadItems();
   }, []);
   return (
@@ -176,14 +179,14 @@ export const ENatureOperation = ({
         label="Code"
         name="Codenature"
         value={item.Codenature}
-        maxlength={60}
+        maxlength={50}
         addChange={changeHandler}
       />
       <TInput
         label="Description"
         name="Description"
         value={item.Description}
-        maxlength={60}
+        maxlength={100}
         addChange={changeHandler}
       />
       <TSelect
@@ -192,20 +195,25 @@ export const ENatureOperation = ({
         items={Compta}
         columnId="Idcompte"
         columnDisplay="Numcompte"
+        render={(o) => (
+          <>
+            {o.Numcompte} {o.Intitule}
+          </>
+        )}
         value={item.Idcompte}
         maxlength={60}
         addChange={changeHandler}
       />
       <TSelect
         label="Type de nature"
-        name="TypeNature"
+        name="Typenature"
         items={[
           { value: 0, label: "Opération" },
           { value: 1, label: "Regularisation" },
         ]}
         columnId="value"
         columnDisplay="label"
-        value={item.TypeNature}
+        value={item.Typenature}
         addChange={changeHandler}
       />
       <TSelect

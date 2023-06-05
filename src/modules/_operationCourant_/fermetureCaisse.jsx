@@ -1,34 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TFormList, TTable, TValidationButton } from "../../utils/__";
+import { GetCookie, GetCookies } from "../../utils/getCookies";
+import { RemoveCookie } from "../../utils/removeCookies";
 
 export const FermetureCaisse = ({ children }) => {
-  const [items, setItems] = useState([
-    {
-      c1: "CAISSE_PRINCIPALE",
-      c2: "Charline",
-      c3: 2023,
-      c4: "MAI",
-      c5: "57xxxx",
-    },
-  ]);
-  //
+  const objString = localStorage.getItem("myData");
+  const obj = JSON.parse(objString);
 
-  const print = (e) => {
-    // setOpen({ ...open, groupe: true });
-    console.log("Impression");
+  const [showCloseMessage, setShowCloseMessage] = useState(false);
+  const [items, setItems] = useState([]);
+  //
+  useEffect(() => {
+    handleClose();
+  }, []);
+
+  const handleClose = () => {
+    obj !== null ? setShowCloseMessage(false) : setShowCloseMessage(true);
   };
+
   const close = (e) => {
-    // setOpen({ ...open, groupe: true });
-    console.log("Fermeture de la caisse");
+    // Récupération de la chaîne JSON depuis le localStorage
+    localStorage.removeItem("myData");
+    //RemoveCookie("caisseData");
+    setShowCloseMessage(true);
   };
 
   return (
     <>
       <TFormList
-        title="Liste des caisses ouvertes"
-        options={<TValidationButton close={close} print={print} />}
+        title="Fermeture de la caisse"
+        options={<TValidationButton close={close} />}
       >
-        <TTable
+        {/* <TTable
           items={items}
           columns={["c1", "c2", "c3", "c4", "c5"]}
           columnsDisplay={[
@@ -39,8 +42,13 @@ export const FermetureCaisse = ({ children }) => {
             "Compte de caisse",
           ]}
           // columnsWidth={["120px", "auto"]}
-        ></TTable>
+        ></TTable> */}
       </TFormList>
+      <br />
+      {showCloseMessage && <div className="close-message">Caisse Fermée !</div>}
+      {!showCloseMessage && (
+        <div className="success-message">Caisse Ouverte !</div>
+      )}
     </>
   );
 };

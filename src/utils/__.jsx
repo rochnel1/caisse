@@ -25,6 +25,17 @@ export const TInput = ({
             onChange={addChange}
           />
         </label>
+      ) : type === "textarea" ? (
+        <label className="input-line">
+          <textarea
+            name={name}
+            checked={value}
+            placeholder={placeholder}
+            maxLength={maxlength}
+            onChange={addChange}
+          />
+          <font>{label}</font>
+        </label>
       ) : (
         <label className="input-line">
           <input
@@ -38,6 +49,7 @@ export const TInput = ({
           <font>{label}</font>
         </label>
       )}
+
       {children}
     </>
   );
@@ -56,7 +68,9 @@ export const TSelect = ({
   ],
   columnId = "c1",
   columnDisplay = "c2",
+  render = null,
   addChange,
+  disable = false,
 }) => {
   return (
     <>
@@ -68,11 +82,16 @@ export const TSelect = ({
           placeholder={placeholder}
           maxLength={maxlength}
           onChange={addChange}
+          disabled={disable}
+          // defaultValue={defaultValue}
         >
+          <option value="" selected defaultValue>
+            Choisissez une option
+          </option>
           {items &&
             items.map((o, i) => (
               <option key={i} value={o[columnId]}>
-                {o[columnDisplay]}
+                {render ? render(o) : o[columnDisplay]}
               </option>
             ))}
         </select>
@@ -95,11 +114,13 @@ export const TValidationButton = ({
   validate,
   refresh,
   close,
+  all,
 }) => {
   return (
     <>
       <div className="btn-validation">
         {add && <button onClick={add}>Ajouter</button>}
+        {all && <button onClick={all}>Tous</button>}
         {save && <button onClick={save}>Enregistrer</button>}
         {saveAndPrint && (
           <button onClick={saveAndPrint}>Enregistrer & imprimer</button>

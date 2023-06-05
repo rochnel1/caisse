@@ -13,9 +13,16 @@ import { OOperation } from "../_administration_/_init_";
 import { api } from "../../utils/api";
 import { ENDPOINTS } from "../../utils/Variables";
 import { jsonDateConvert } from "../../utils/utils";
+import { GetCookie } from "../../utils/getCookies";
 
 //sens : 0 pour encaissement et 1 pour décaissement
 export const OperationCaisse = ({ children, sens = 0 }) => {
+  // Récupération de la chaîne JSON depuis le localStorage
+  const objString = localStorage.getItem("myData");
+
+  // Conversion de la chaîne JSON en objet JavaScript
+  const obj = JSON.parse(objString);
+
   useEffect(() => {
     console.log("myParameter has changed:", sens);
   }, [sens]);
@@ -30,11 +37,11 @@ export const OperationCaisse = ({ children, sens = 0 }) => {
   const [open, setOpen] = useState({
     frame: false,
     sens: sens,
-    IdOperation: 0,
+    Idoperation: 0,
   });
 
   const add = (e) => {
-    setOpen({ ...open, frame: true, sens: sens, IdOperation: 0 });
+    setOpen({ ...open, frame: true, sens: sens, Idoperation: 0 });
   };
 
   const print = (e) => {
@@ -43,7 +50,7 @@ export const OperationCaisse = ({ children, sens = 0 }) => {
   };
   const modify = (id) => {
     // console.log(id);
-    setOpen({ ...open, frame: true, IdOperation: id });
+    setOpen({ ...open, frame: true, Idoperation: id });
   };
 
   const quit = (e) => {
@@ -58,13 +65,19 @@ export const OperationCaisse = ({ children, sens = 0 }) => {
   const loadItems = () => {
     api(ENDPOINTS.operations)
       .fetch()
-      .then((res) => setItems(res.data))
+      .then((res) => {
+        let temp = res.data;
+        temp = temp.filter(
+          (o) => o.Sens == (sens == 0 ? "Encaissement" : "Décaissment")
+        );
+        setItems(temp);
+      })
       .catch((err) => alert(err));
   };
 
   useEffect(() => {
     loadItems();
-  }, [refresh]);
+  }, [refresh, sens]);
 
   //
   const setBabalScript = (bab) => {
@@ -91,7 +104,10 @@ export const OperationCaisse = ({ children, sens = 0 }) => {
               render: (o) =>
                 setBabalScript(o.IdpersonnelNavigation?.Codepersonnel),
             },
-            { name: "Dateoperation" },
+            {
+              name: "Dateoperation",
+              render: (o) => new Date(o.Dateoperation).toLocaleString(),
+            },
             { name: "Description" },
             { name: "Montant" },
             { name: "Sens" },
@@ -108,11 +124,6 @@ export const OperationCaisse = ({ children, sens = 0 }) => {
               render: (o) =>
                 setBabalScript(o.IdnatureoperationNavigation?.Codenature),
             },
-            {
-              name: "",
-              render: (o) =>
-                setBabalScript(o.IdnatureoperationNavigation?.Numcompte),
-            },
             { name: "Etat" },
           ]}
           columnsDisplay={[
@@ -125,7 +136,6 @@ export const OperationCaisse = ({ children, sens = 0 }) => {
             "Exercice",
             "Période",
             "Nature d'opération",
-            "Compte général associé",
             "Etat",
           ]}
           lineClick={(o) => {
@@ -139,7 +149,7 @@ export const OperationCaisse = ({ children, sens = 0 }) => {
           <EOperationCaisse
             sens={open.sens}
             addQuiHandler={quit}
-            itemId={open.IdOperation}
+            itemId={open.Idoperation}
             addRefreshHandler={rafraichir}
           />
         </TModal>
@@ -161,37 +171,58 @@ export const EOperationCaisse = ({
     setItem({ ...item, [e.target.name]: e.target.value });
   };
 
-  console.log("Id de l'item :" + itemId);
   const save = async (e) => {
-    sens === 0 ? (item.Sens = "Encaissement") : (item.Sens = "Décaissment");
+    console.log(itemId);
+    console.log(item.Idoperation);
 
-    if (item.IdOperation === 0) {
+    // Récupération de la chaîne JSON depuis le localStorage
+    const objString = localStorage.getItem("myData");
+    //const objString = GetCookie("caisseData");
+
+    // Conversion de la chaîne JSON en objet JavaScript
+    const obj = JSON.parse(objString);
+    item.Idcaisse = obj.caisse;
+    item.Idexercice = obj.exercice;
+    item.Idperiode = obj.periode;
+    item.Idpersonnel = obj.personel;
+
+    sens === 0 ? (item.Sens = "Encaissement") : (item.Sens = "Décaissment");
+    item.Etat = "OP";
+
+    if (item.Idoperation === 0) {
       //nouvel enregistrement
-      delete item.IdOperation;
+      item.Dateoperation = new Date();
+      delete item.Idoperation;
       await api(ENDPOINTS.operations).post(item);
     } else {
       //modification
-      await api(ENDPOINTS.operations).put(item.IdOperation, item);
+      await api(ENDPOINTS.operations).put(item.Idoperation, item);
     }
     setItem({ ...OOperation });
     if (addRefreshHandler) addRefreshHandler();
     if (addQuiHandler) addQuiHandler();
-
-    // console.log(item);
   };
 
   const remove = async (e) => {
-    if (item.IdOperation === 0) return;
-    const res = await api(ENDPOINTS.operations).delete(item.IdOperation, item);
+    if (item.Idoperation === 0) return;
+    const res = await api(ENDPOINTS.operations).delete(item.Idoperation, item);
     if (addRefreshHandler) addRefreshHandler(res);
     if (addQuiHandler) addQuiHandler();
   };
 
   const [nature, setNature] = useState([]);
+
   const loadItemsNature = () => {
     api(ENDPOINTS.natureoperations)
       .fetch()
-      .then((res) => setNature(res.data))
+      .then((res) => {
+        let temp = res.data;
+        temp = temp.filter(
+          (o) =>
+            (o.Sensnature == sens || o.Sensnature == 2) && o.Typenature == 0
+        );
+        setNature(temp);
+      })
       .catch((err) => alert(err));
   };
 
@@ -213,28 +244,11 @@ export const EOperationCaisse = ({
         valPanel={
           <TValidationButton
             save={save}
-            remove={(e) => (item.IdOperation !== 0 ? remove() : undefined)}
+            remove={(e) => (item.Idoperation !== 0 ? remove() : undefined)}
             cancel={addQuiHandler}
           />
         }
       >
-        <TLayout cols="1fr 1fr ">
-          <TInput
-            label="Description de l'opération"
-            name="Description"
-            value={item.Description}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-          <TInput
-            label="Montant de l'opération"
-            name="Montant"
-            value={item.Montant}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-        </TLayout>
-
         <TSelect
           label="Nature de l'opération"
           name="Idnatureoperation"
@@ -246,29 +260,21 @@ export const EOperationCaisse = ({
           addChange={changeHandler}
         />
 
-        <TLayout cols="1fr 1fr 1fr">
-          <TInput
-            label="Compte général associé à la nature"
-            name="IdcompteNavigation"
-            value={item.Idnatureoperation}
-            maxlength={60}
-            // addChange={changeHandler}
-          />
-          <TInput
-            label="Compte de la caisse"
-            name="compte_caisse"
-            value={item.compte_caisse}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-          <TInput
-            label="Etat"
-            name="etat"
-            value={(item.Etat = "OP")}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-        </TLayout>
+        <TInput
+          type="textarea"
+          label="Description de l'opération"
+          name="Description"
+          value={item.Description}
+          addChange={changeHandler}
+        />
+
+        <TInput
+          label="Montant de l'opération"
+          name="Montant"
+          value={item.Montant}
+          maxlength={60}
+          addChange={changeHandler}
+        />
 
         {children}
       </TFormulaire>

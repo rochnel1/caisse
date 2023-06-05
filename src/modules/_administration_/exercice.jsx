@@ -18,14 +18,18 @@ export const Exercices = ({ children }) => {
   const [items, setItems] = useState([]);
   const [refresh, setRefresh] = useState(false);
   //
-  const [open, setOpen] = useState({ exercice: false, Idexercice: 0 });
+  const [open, setOpen] = useState({
+    exercice: false,
+    Idexercice: 0,
+    codeExercie: "",
+  });
 
   const add = (e) => {
     setOpen({ ...open, exercice: true, Idexercice: 0 });
   };
 
-  const modify = (id) => {
-    setOpen({ ...open, exercice: true, Idexercice: id });
+  const modify = (id, code) => {
+    setOpen({ ...open, exercice: true, Idexercice: id, codeExercie: code });
     //<Periodes id={id} />;
   };
 
@@ -64,8 +68,14 @@ export const Exercices = ({ children }) => {
           items={items}
           columns={[
             { name: "Code" },
-            { name: "Datedebut" },
-            { name: "Datefin" },
+            {
+              name: "Datedebut",
+              render: (o) => new Date(o.Datedebut).toLocaleString(),
+            },
+            {
+              name: "Datefin",
+              render: (o) => new Date(o.Datefin).toLocaleString(),
+            },
             { name: "Statut", render: (o) => (o.Statut ? "En cours" : "") },
             { name: "Cloture", render: (o) => (o.Cloture ? "Oui" : "Non") },
           ]}
@@ -77,7 +87,7 @@ export const Exercices = ({ children }) => {
             "Cloturé",
           ]}
           lineClick={(o) => {
-            modify(o.Idexercice);
+            modify(o.Idexercice, o.Code);
           }}
         ></TTable>
       </TFormList>
@@ -90,7 +100,7 @@ export const Exercices = ({ children }) => {
           />
         </TModal>
       )}
-      <Periodes />
+      <Periodes id={open.Idexercice} titre={open.codeExercie} />
     </>
   );
 };
@@ -111,6 +121,7 @@ export const EExercices = ({
   };
 
   const save = async (e) => {
+    console.log(item);
     try {
       if (item.Idexercice === 0) {
         //nouvel enregistrement
@@ -205,7 +216,7 @@ export const EExercices = ({
   );
 };
 
-export const Periodes = ({ children, id }) => {
+export const Periodes = ({ children, id, titre }) => {
   const [items, setItems] = useState([]);
   const [open, setOpen] = useState({ periode: false, Idperiode: 0 });
   const [refresh, setRefresh] = useState(false);
@@ -223,19 +234,26 @@ export const Periodes = ({ children, id }) => {
   };
 
   const rafraichir = () => {
+    loadItems(0);
     setRefresh(!refresh);
   };
 
-  const loadItems = () => {
-    api(ENDPOINTS.periodes)
-      .fetch()
-      .then((res) => setItems(res.data))
+  const loadItems = (i) => {
+    if (i == 0) {
+      setItems([]);
+      return;
+    }
+    api(ENDPOINTS.periodesExercice)
+      .fetchById(i)
+      .then((res) => {
+        setItems(res.data);
+      })
       .catch((err) => alert(err));
   };
 
   useEffect(() => {
-    loadItems();
-  }, [refresh]);
+    loadItems(id);
+  }, [refresh, id]);
 
   //
   const setBabalScript = (bab) => {
@@ -244,7 +262,7 @@ export const Periodes = ({ children, id }) => {
   return (
     <>
       <TFormList
-        title="Liste des périodes"
+        title={"Liste des périodes : " + titre}
         options={<TValidationButton add={add} refresh={rafraichir} />}
       >
         <TTable
@@ -255,8 +273,14 @@ export const Periodes = ({ children, id }) => {
               render: (o) => setBabalScript(o.IdexerciceNavigation?.Code),
             },
             { name: "Codeperiode" },
-            { name: "Datedebut" },
-            { name: "Datefin" },
+            {
+              name: "Datedebut",
+              render: (o) => new Date(o.Datedebut).toLocaleString(),
+            },
+            {
+              name: "Datefin",
+              render: (o) => new Date(o.Datefin).toLocaleString(),
+            },
           ]}
           columnsDisplay={[
             "Exercice",
@@ -272,6 +296,7 @@ export const Periodes = ({ children, id }) => {
       {open.periode && (
         <TModal>
           <EPeriodes
+            exerciceId={id}
             addQuiHandler={quit}
             itemId={open.Idperiode}
             addRefreshHandler={rafraichir}
@@ -287,6 +312,7 @@ export const EPeriodes = ({
   addQuiHandler,
   itemId = 0,
   addRefreshHandler,
+  exerciceId = 0,
 }) => {
   const [item, setItem] = useState(OPeriode);
 
@@ -327,7 +353,7 @@ export const EPeriodes = ({
 
   useEffect(() => {
     // console.log("Code With Rochnel");
-    setItem({ ...OPeriode });
+    setItem({ ...OPeriode, Idexercice: exerciceId });
     // alert(itemId);
     if (itemId !== 0) {
       api(ENDPOINTS.periodes)
@@ -362,6 +388,7 @@ export const EPeriodes = ({
           columnDisplay="Code"
           value={item.Idexercice}
           addChange={changeHandler}
+          disable={true}
         />
         <TInput
           label="Code période"
