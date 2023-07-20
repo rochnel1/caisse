@@ -13,10 +13,12 @@ import {
 } from "../../utils/__";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
+import { Load } from "../../utils/load";
+import { ToastContainer, toast } from "react-toastify";
 
 export const InitBudget = ({ children }) => {
   const [items, setItems] = useState([]);
-  //
+  const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
 
   const [open, setOpen] = useState({ initbudget: false, Idbudget: 0 });
@@ -51,6 +53,10 @@ export const InitBudget = ({ children }) => {
   };
 
   useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
     loadItems();
   }, [refresh]);
 
@@ -61,53 +67,60 @@ export const InitBudget = ({ children }) => {
 
   return (
     <>
-      <TFormList
-        title="Liste des budgets"
-        options={
-          <TValidationButton add={add} print={print} refresh={rafraichir} />
-        }
-      >
-        <TTable
-          items={items}
-          columns={[
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdexerciceNavigation?.Code),
-            },
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdperiodeNavigation?.Codeperiode),
-            },
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdperiodeNavigation?.Datedebut),
-            },
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdperiodeNavigation?.Datefin),
-            },
-            {
-              name: "",
-              render: (o) =>
-                setBabalScript(o.IdnatureoperationNavigation?.Codenature),
-            },
-            { name: "Montantbudget" },
-            { name: "Sensbudget" },
-          ]}
-          columnsDisplay={[
-            "Exercice",
-            "Période",
-            "Date de Début",
-            "Date de Fin",
-            "Nature d'opération",
-            "Montant( prévision )",
-            "Sens",
-          ]}
-          lineClick={(o) => {
-            modify(o.Idbudget);
-          }}
-        ></TTable>
-      </TFormList>
+      {loading ? (
+        <Load loading={loading} />
+      ) : (
+        <TFormList
+          title="Liste des budgets"
+          options={
+            <TValidationButton add={add} print={print} refresh={rafraichir} />
+          }
+        >
+          <TTable
+            items={items}
+            columns={[
+              {
+                name: "",
+                render: (o) => setBabalScript(o.IdexerciceNavigation?.Code),
+              },
+              {
+                name: "",
+                render: (o) =>
+                  setBabalScript(o.IdperiodeNavigation?.Codeperiode),
+              },
+              {
+                name: "",
+                render: (o) =>
+                  new Date(o.IdperiodeNavigation?.Datedebut).toLocaleString(),
+              },
+              {
+                name: "",
+                render: (o) =>
+                  new Date(o.IdperiodeNavigation?.Datefin).toLocaleString(),
+              },
+              {
+                name: "",
+                render: (o) =>
+                  setBabalScript(o.IdnatureoperationNavigation?.Codenature),
+              },
+              { name: "Montantbudget" },
+              { name: "Sensbudget" },
+            ]}
+            columnsDisplay={[
+              "Exercice",
+              "Période",
+              "Date de Début",
+              "Date de Fin",
+              "Nature d'opération",
+              "Montant( prévision )",
+              "Sens",
+            ]}
+            lineClick={(o) => {
+              modify(o.Idbudget);
+            }}
+          ></TTable>
+        </TFormList>
+      )}
       {open.initbudget && (
         <TModal>
           <EInitBudget
@@ -128,6 +141,7 @@ export const EInitBudget = ({
   addRefreshHandler,
 }) => {
   const [item, setItem] = useState(OInitBudget);
+  const notify = (msg) => toast.success(msg);
 
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
@@ -137,8 +151,6 @@ export const EInitBudget = ({
     item.Sensbudget === 0
       ? (item.Sensbudget = "Encaissement")
       : (item.Sensbudget = "Décaissement");
-
-    // console.log(item.Montantbudget);
 
     if (item.Idbudget === 0) {
       //nouvel enregistrement
@@ -151,6 +163,7 @@ export const EInitBudget = ({
     setItem({ ...OInitBudget });
     if (addRefreshHandler) addRefreshHandler();
     if (addQuiHandler) addQuiHandler();
+    notify("Budget ajoutée avec succès");
   };
 
   const remove = async (e) => {
@@ -170,12 +183,14 @@ export const EInitBudget = ({
       .then((res) => setExercice(res.data))
       .catch((err) => alert(err));
   };
+
   const loadItemsPeriode = () => {
     api(ENDPOINTS.periodes)
       .fetch()
       .then((res) => setPeriode(res.data))
       .catch((err) => alert(err));
   };
+
   const loadItemsNature = () => {
     api(ENDPOINTS.natureoperations)
       .fetch()
@@ -197,71 +212,84 @@ export const EInitBudget = ({
   }, []);
 
   return (
-    <TFormulaire
-      title="Nouveau budget"
-      valPanel={
-        <TValidationButton
-          add={save}
-          remove={(e) => (item.Idbudget !== 0 ? remove() : undefined)}
-          cancel={addQuiHandler}
-        />
-      }
-    >
-      <TLayout cols="1fr 1fr">
-        <TSelect
-          label="Exercice"
-          name="Idexercice"
-          items={exercice}
-          columnId="Idexercice"
-          columnDisplay="Code"
-          value={item.Idexercice}
-          maxlength={60}
-          addChange={changeHandler}
-        />
-        <TSelect
-          label="Période"
-          name="Idperiode"
-          items={periode}
-          columnId="Idperiode"
-          columnDisplay="Codeperiode"
-          value={item.Idperiode}
-          maxlength={60}
-          addChange={changeHandler}
-        />
-      </TLayout>
-      <TSelect
-        label="Nature d'opération"
-        name="Idnatureoperation"
-        items={nature}
-        columnId="Idnatureoperation"
-        columnDisplay="Codenature"
-        value={item.Idnatureoperation}
-        maxlength={60}
-        addChange={changeHandler}
+    <>
+      <ToastContainer
+        position="top-center"
+        autoClose={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        theme="dark"
       />
-      <TLayout cols="1fr 1fr">
-        <TInput
-          label="Montant"
-          name="Montantbudget"
-          value={item.Montantbudget}
+      <TFormulaire
+        title="Nouveau budget"
+        valPanel={
+          <TValidationButton
+            add={save}
+            addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
+            remove={(e) => (item.Idbudget !== 0 ? remove() : undefined)}
+            cancel={addQuiHandler}
+          />
+        }
+      >
+        <TLayout cols="1fr 1fr">
+          <TSelect
+            label="Exercice"
+            name="Idexercice"
+            items={exercice}
+            columnId="Idexercice"
+            columnDisplay="Code"
+            value={item.Idexercice}
+            maxlength={60}
+            addChange={changeHandler}
+          />
+          <TSelect
+            label="Période"
+            name="Idperiode"
+            items={periode}
+            columnId="Idperiode"
+            columnDisplay="Codeperiode"
+            value={item.Idperiode}
+            maxlength={60}
+            addChange={changeHandler}
+          />
+        </TLayout>
+        <TSelect
+          label="Nature d'opération"
+          name="Idnatureoperation"
+          items={nature}
+          columnId="Idnatureoperation"
+          columnDisplay="Codenature"
+          value={item.Idnatureoperation}
           maxlength={60}
           addChange={changeHandler}
         />
-        <TSelect
-          label="Sens "
-          name="Sensbudget"
-          items={[
-            { value: 0, label: "Encaissement" },
-            { value: 1, label: "Décaissement" },
-          ]}
-          columnId="value"
-          columnDisplay="label"
-          value={item.Sensbudget}
-          addChange={changeHandler}
-        />
-      </TLayout>
+        <TLayout cols="1fr 1fr">
+          <TInput
+            label="Montant"
+            name="Montantbudget"
+            value={item.Montantbudget}
+            maxlength={60}
+            addChange={changeHandler}
+          />
+          <TSelect
+            label="Sens "
+            name="Sensbudget"
+            items={[
+              { value: 0, label: "Encaissement" },
+              { value: 1, label: "Décaissement" },
+            ]}
+            columnId="value"
+            columnDisplay="label"
+            value={item.Sensbudget}
+            addChange={changeHandler}
+          />
+        </TLayout>
 
-      {children}
-    </TFormulaire>
+        {children}
+      </TFormulaire>
+    </>
   );
 };

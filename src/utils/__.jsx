@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import DataTable from "react-data-table-component";
 import { useNavigate, useNavigation } from "react-router-dom";
 
 export const TInput = ({
@@ -10,6 +11,7 @@ export const TInput = ({
   placeholder,
   maxlength,
   addChange,
+  disable = false,
 }) => {
   return (
     <>
@@ -36,9 +38,22 @@ export const TInput = ({
           />
           <font>{label}</font>
         </label>
+      ) : disable === false ? (
+        <label className="input-line">
+          <input
+            type={type}
+            name={name}
+            checked={value}
+            placeholder={placeholder}
+            maxLength={maxlength}
+            onChange={addChange}
+          />
+          <font>{label}</font>
+        </label>
       ) : (
         <label className="input-line">
           <input
+            disabled
             type={type}
             name={name}
             checked={value}
@@ -109,22 +124,22 @@ export const TValidationButton = ({
   cancel,
   remove,
   save,
-  saveAndPrint,
+  control,
   removeAll,
   validate,
   refresh,
   close,
   all,
+  addLabel = "Ajouter",
 }) => {
   return (
     <>
       <div className="btn-validation">
-        {add && <button onClick={add}>Ajouter</button>}
+        {}
+        {add && <button onClick={add}>{addLabel}</button>}
         {all && <button onClick={all}>Tous</button>}
         {save && <button onClick={save}>Enregistrer</button>}
-        {saveAndPrint && (
-          <button onClick={saveAndPrint}>Enregistrer & imprimer</button>
-        )}
+        {control && <button onClick={control}>Faire le contrôle</button>}
         {modify && <button onClick={modify}>Modifier</button>}
         {print && <button onClick={print}>Imprimer</button>}
         {cancel && <button onClick={cancel}>Annuler</button>}
@@ -312,6 +327,14 @@ export const TFormList = ({
         </div>
         <div>{children}</div>
       </div>
+    </>
+  );
+};
+
+export const TDataTable = ({ columns, data }) => {
+  return (
+    <>
+      <DataTable columns={columns} data={data} pagination />
     </>
   );
 };

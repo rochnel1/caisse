@@ -5,7 +5,28 @@
   justify-content: center;
   height: 100vh;
 }
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.buttonAll {
+  background-color: purple;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
 
+.buttonAll:hover {
+  transform: scale(0.95);
+}
+
+.buttonAll:active {
+  transform: scale(0.9);
+}
 .Nottitle {
   font-size: 4rem;
   margin-bottom: 1rem;

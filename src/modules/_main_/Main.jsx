@@ -215,7 +215,9 @@ function Main({ children }) {
             </div>
           )}
         </div>
+
         <div className="appli-body">{children}</div>
+
         <div className="appli-footer">
           <nav>&copy; GROUPE SIA - 2023 |</nav>
           <nav>Powered by Rochnel Software Engeneer.</nav>

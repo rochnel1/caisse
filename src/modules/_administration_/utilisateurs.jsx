@@ -12,12 +12,13 @@ import {
 import { OUtilisateur } from "./_init_";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
+import { ToastContainer, toast } from "react-toastify";
+import { Load } from "../../utils/load";
 
-//liste des utilisateurs et des groupes d'utilisateur
 export const Utilisateurs = ({ children }) => {
   const [items, setItems] = useState([]);
   const [refresh, setRefresh] = useState(false);
-  //
+  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState({ utilisateur: false, IdUtilisateur: 0 });
 
   const add = (e) => {
@@ -31,7 +32,7 @@ export const Utilisateurs = ({ children }) => {
     setOpen({ ...open, utilisateur: false, groupe: false });
   };
 
-  //hooks
+  const notify = () => toast.warning("Serveur non disponible !");
   const rafraichir = () => {
     setRefresh(!refresh);
   };
@@ -40,10 +41,14 @@ export const Utilisateurs = ({ children }) => {
     api(ENDPOINTS.utilisateurs)
       .fetch()
       .then((res) => setItems(res.data))
-      .catch((err) => alert(err));
+      .catch((err) => notify());
   };
 
   useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
     loadItems();
   }, [refresh]);
 
@@ -54,29 +59,34 @@ export const Utilisateurs = ({ children }) => {
 
   return (
     <>
-      <TFormList
-        title="Liste des utilisateurs"
-        options={<TValidationButton add={add} refresh={rafraichir} />}
-      >
-        <TTable
-          items={items}
-          columns={[
-            { name: "Login" },
-            { name: "Nomutilisateur" },
-            { name: "Prenomutilisateur" },
-            {
-              name: "",
-              render: (o) =>
-                setBabalScript(o.IdgpeutilisateurNavigation?.Nomgroupe),
-            },
-          ]}
-          columnsDisplay={["Login", "Nom", "Prénom", "Groupe utilisateur"]}
-          columnsWidth={["auto", "auto", "auto", "120px"]}
-          lineClick={(o) => {
-            modify(o.IdUtilisateur);
-          }}
-        ></TTable>
-      </TFormList>
+      <ToastContainer />
+      {loading ? (
+        <Load loading={loading} />
+      ) : (
+        <TFormList
+          title="Liste des utilisateurs"
+          options={<TValidationButton add={add} refresh={rafraichir} />}
+        >
+          <TTable
+            items={items}
+            columns={[
+              { name: "Login" },
+              { name: "Nomutilisateur" },
+              { name: "Prenomutilisateur" },
+              {
+                name: "",
+                render: (o) =>
+                  setBabalScript(o.IdgpeutilisateurNavigation?.Nomgroupe),
+              },
+            ]}
+            columnsDisplay={["Login", "Nom", "Prénom", "Groupe utilisateur"]}
+            columnsWidth={["auto", "auto", "auto", "120px"]}
+            lineClick={(o) => {
+              modify(o.IdUtilisateur);
+            }}
+          ></TTable>
+        </TFormList>
+      )}
       {open.utilisateur && (
         <TModal>
           <EUtilisateur
@@ -90,10 +100,6 @@ export const Utilisateurs = ({ children }) => {
   );
 };
 
-/*
-les écrans ou formulaire de création d'utilisateur ou groupe d'utilisateur
-*/
-
 export const EUtilisateur = ({
   children,
   itemId = 0,
@@ -101,6 +107,7 @@ export const EUtilisateur = ({
   addRefreshHandler,
 }) => {
   const [item, setItem] = useState(OUtilisateur);
+  const notify = (msg) => toast.success(msg);
 
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
@@ -119,6 +126,7 @@ export const EUtilisateur = ({
     setItem({ ...OUtilisateur });
     if (addRefreshHandler) addRefreshHandler();
     if (addQuiHandler) addQuiHandler();
+    notify("Utilisateur ajoutée avec succès");
   };
 
   const remove = async (e) => {
@@ -157,50 +165,64 @@ export const EUtilisateur = ({
   };
 
   return (
-    <TFormulaire
-      title="Nouvel Utilisateur"
-      valPanel={
-        <TValidationButton
-          add={save}
-          remove={(e) => (item.IdUtilisateur !== 0 ? remove() : undefined)}
-          cancel={addQuiHandler}
-        />
-      }
-    >
-      <TInput
-        label="Login"
-        name="Login"
-        value={item.Login}
-        maxlength={10}
-        addChange={changeHandler}
+    <>
+      <ToastContainer
+        position="top-center"
+        autoClose={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        theme="dark"
       />
-      <TLayout cols="1fr 1fr">
+      ;
+      <TFormulaire
+        title="Nouvel Utilisateur"
+        valPanel={
+          <TValidationButton
+            add={save}
+            addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
+            remove={(e) => (item.IdUtilisateur !== 0 ? remove() : undefined)}
+            cancel={addQuiHandler}
+          />
+        }
+      >
         <TInput
-          label="Nom(s)"
-          name="Nomutilisateur"
-          value={item.Nomutilisateur}
-          maxlength={60}
+          label="Login"
+          name="Login"
+          value={item.Login}
+          maxlength={10}
           addChange={changeHandler}
         />
-        <TInput
-          label="Prénom(s)"
-          name="Prenomutilisateur"
-          value={item.Prenomutilisateur}
-          maxlength={60}
-          addChange={changeHandler}
-        />
-      </TLayout>
+        <TLayout cols="1fr 1fr">
+          <TInput
+            label="Nom(s)"
+            name="Nomutilisateur"
+            value={item.Nomutilisateur}
+            maxlength={60}
+            addChange={changeHandler}
+          />
+          <TInput
+            label="Prénom(s)"
+            name="Prenomutilisateur"
+            value={item.Prenomutilisateur}
+            maxlength={60}
+            addChange={changeHandler}
+          />
+        </TLayout>
 
-      <TSelect
-        label="Groupe d'utilisateur"
-        name="Idgpeutilisateur"
-        items={groupes}
-        columnId="Idgpeutilisateur"
-        columnDisplay="Nomgroupe"
-        value={item.Idgpeutilisateur}
-        addChange={changeHandler}
-      />
-      {children}
-    </TFormulaire>
+        <TSelect
+          label="Groupe d'utilisateur"
+          name="Idgpeutilisateur"
+          items={groupes}
+          columnId="Idgpeutilisateur"
+          columnDisplay="Nomgroupe"
+          value={item.Idgpeutilisateur}
+          addChange={changeHandler}
+        />
+        {children}
+      </TFormulaire>
+    </>
   );
 };

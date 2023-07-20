@@ -25,7 +25,7 @@ export const OPersonnel = {
   Codepersonnel: "",
   Nom: "",
   Prenom: "",
-  Profil: "Caissier",
+  Profil: "",
   Idcaisse: 0,
 };
 
@@ -75,19 +75,19 @@ export const OInitBudget = {
 };
 
 export const OGeneralite = {
-  raison_sociale: "",
+  Raisonsocial: "",
   nom_commercial: "",
-  adresse: "",
-  ville: "",
-  region: "",
-  pays: "",
-  monnaie: "",
-  format: "",
-  niu: "",
-  registre_commerce: "",
-  telephone: "",
-  adresse_mail: "",
-  site_internet: "",
+  Adresse: "",
+  Ville: "",
+  Region: "",
+  Pays: "",
+  Monnaie: "",
+  Format: "",
+  Niu: "",
+  Registrecommerce: "",
+  Telephone: "",
+  Adressemail: "",
+  Siteinternet: "",
 };
 
 export const OOuvertureCaisse = {
@@ -116,15 +116,17 @@ export const OOperation = {
   Dateoperation: new Date(),
   Description: "",
   Montant: "",
-  Sens: "",
+  MontantPercu: "",
+  Sens: 0,
   Etat: "OP",
   Nbrecontrole: "",
-  Controlerpar: "",
+  Controlerpar: 0,
   Comptabilserpar: "",
   Datecontrole: "",
   Datecloture: "",
   Datecomptabilisation: "",
-  Cloturepar: "",
+  Cloturepar: 0,
+  Regularise: false,
 };
 
 export const OPlanComptable = {

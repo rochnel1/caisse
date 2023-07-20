@@ -30,10 +30,6 @@ export const OuvertureCaisse = ({ children }) => {
     setOpen({ ...open, ouvertureCaisse: true, Idoperation: 0 });
   };
 
-  const modify = (id) => {
-    setOpen({ ...open, ouvertureCaisse: true, Idoperation: id });
-  };
-
   const print = (e) => {
     // setOpen({ ...open, groupe: true });
     console.log("Impression");
@@ -44,21 +40,10 @@ export const OuvertureCaisse = ({ children }) => {
     setRefresh(!refresh);
   };
 
-  const loadItems = () => {
-    api(ENDPOINTS.operations)
-      .fetch()
-      .then((res) => setItems(res.data))
-      .catch((err) => alert(err));
-  };
-
   useEffect(() => {
-    loadItems();
+    // loadItems();
     handleSave();
   }, [refresh]);
-
-  const setBabalScript = (bab) => {
-    return <>{bab}</>;
-  };
 
   const quit = (e) => {
     setOpen({ ...open, ouvertureCaisse: false });
@@ -75,52 +60,11 @@ export const OuvertureCaisse = ({ children }) => {
       <TFormList
         title="Ouverture de Caisses"
         options={<TValidationButton add={add} print={print} />}
-      >
-        {/* <TTable
-          items={items}
-          columns={[
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdcaisseNavigation?.Codecaisse),
-            },
-            {
-              name: "",
-              render: (o) =>
-                setBabalScript(o.IdpersonnelNavigation?.Codepersonnel),
-            },
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdexerciceNavigation?.Code),
-            },
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdperiodeNavigation?.Codeperiode),
-            },
-            {
-              name: "",
-              render: (o) =>
-                setBabalScript(
-                  o.IdcaisseNavigation?.IdcompteNavigation?.Numcompte
-                ),
-            },
-          ]}
-          columnsDisplay={[
-            "Caisse",
-            "Caissier",
-            "Exercice",
-            "Période",
-            "Compte de caisse",
-          ]}
-          lineClick={(o) => {
-            modify(o.Idoperation);
-          }}
-        ></TTable> */}
-      </TFormList>
+      ></TFormList>
       {open.ouvertureCaisse && (
         <TModal>
           <EOuvertureCaisse
             addQuiHandler={quit}
-            itemId={open.Idoperation}
             addRefreshHandler={rafraichir}
             displayMessage={handleSave}
           />
@@ -152,36 +96,19 @@ export const EOuvertureCaisse = ({
   };
 
   const save = async (e) => {
-    if (item.Idoperation === 0) {
-      //nouvel enregistrement
-      delete item.IdUtilisateur;
-      // await api(ENDPOINTS.operations).post(item);
+    // Enregistrement de l'objet dans le localStorage
+    const obj = {
+      caisse: item.Idcaisse,
+      personel: item.Idpersonnel,
+      exercice: item.Idexercice,
+      periode: item.Idperiode,
+    };
 
-      // Enregistrement de l'objet dans le localStorage
-      const obj = {
-        caisse: item.Idcaisse,
-        personel: item.Idpersonnel,
-        exercice: item.Idexercice,
-        periode: item.Idperiode,
-      };
-
-      localStorage.setItem("myData", JSON.stringify(obj));
-      //SetCookie("caisseData", JSON.stringify(obj));
-    } else {
-      //modification
-      await api(ENDPOINTS.operations).put(item.Idoperation, item);
-    }
+    localStorage.setItem("myData", JSON.stringify(obj));
     setItem({ ...OOperation });
     if (addRefreshHandler) addRefreshHandler();
     if (addQuiHandler) addQuiHandler();
     if (displayMessage) displayMessage();
-  };
-
-  const remove = async (e) => {
-    if (item.Idoperation === 0) return;
-    const res = await api(ENDPOINTS.operations).delete(item.Idoperation, item);
-    if (addRefreshHandler) addRefreshHandler(res);
-    if (addQuiHandler) addQuiHandler();
   };
 
   const [caisse, setCaisse] = useState([]);
@@ -210,8 +137,11 @@ export const EOuvertureCaisse = ({
   const loadItemsPersonnel = () => {
     api(ENDPOINTS.personnels)
       .fetch()
-      .then((res) => setPersonnel(res.data))
-      .catch((err) => alert(err));
+      .then((res) => {
+        let temp = res.data;
+        temp = temp.filter((o) => o.Profil == "Caissier");
+        setPersonnel(temp);
+      });
   };
 
   useEffect(() => {
@@ -231,13 +161,7 @@ export const EOuvertureCaisse = ({
   return (
     <TFormulaire
       title="Ouverture d'une caisse"
-      valPanel={
-        <TValidationButton
-          save={save}
-          remove={(e) => (item.Idoperation !== 0 ? remove() : undefined)}
-          cancel={addQuiHandler}
-        />
-      }
+      valPanel={<TValidationButton save={save} cancel={addQuiHandler} />}
     >
       <TLayout cols="1fr 1fr">
         <TSelect

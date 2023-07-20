@@ -11,149 +11,127 @@ import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
 
 export const Generalite = ({ children }) => {
-  const [items, setItems] = useState([]);
-  //
-
-  const [refresh, setRefresh] = useState(false);
-
-  const loadGeneralite = () => {
-    api(ENDPOINTS.generalite)
-      .fetch()
-      .then((res) => setItems(res.data))
-      .catch((err) => alert(err));
-  };
-  useEffect(() => {
-    // console.log("Code With Rochnel");
-    loadGeneralite();
-  }, []);
-  return (
-    <>
-      <EGeneralite />
-    </>
-  );
-};
-
-export const EGeneralite = ({ children }) => {
   const [item, setItem] = useState(OGeneralite);
+
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
 
-  const save = (e) => {
-    // setOpen({ ...open, generalite: true, Idgeneralite: 0 });
+  const save = async (e) => {
+    delete item.nom_commercial;
+    await api(ENDPOINTS.generalites).post(item);
   };
 
   const print = (e) => {
-    // setOpen({ ...open, groupe: true });
-    console.log("Imprimer ");
+    console.log("Imprimer = " + item);
   };
 
   return (
-    <div>
-      <TFormulaire title="Informations sur l'entreprise">
-        <TInput
-          label="Nom commercial"
-          name="nom_commercial"
-          value={
-            (item.nom_commercial = "Groupe Système Informatique & application")
-          }
-          maxlength={60}
-          addChange={changeHandler}
-        />
-        <TLayout cols="1fr 1fr">
+    <>
+      <div>
+        <TFormulaire title="Informations sur l'entreprise">
           <TInput
-            label="Raison sociale"
-            name="raison_sociale"
-            value={(item.raison_sociale = "GROUPE SIA")}
-            maxlength={10}
-            addChange={changeHandler}
-          />
-          <TInput
-            label="Adresse"
-            name="adresse"
-            value={(item.adresse = "Elig Essoono")}
+            label="Nom commercial"
+            name="nom_commercial"
+            value={item.nom_commercial}
             maxlength={60}
             addChange={changeHandler}
           />
-        </TLayout>
-        <TLayout cols="1fr 1fr 1fr 1fr">
-          <TInput
-            label="Ville"
-            name="ville"
-            value={(item.ville = "Yaoundé")}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-          <TInput
-            label="Région"
-            name="region"
-            value={(item.region = "Centre")}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-          <TInput
-            label="Pays"
-            name="pays"
-            value={(item.pays = "Cameroun")}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-          <TInput
-            label="Monnaie"
-            name="monnaie"
-            value={(item.monnaie = "FCFA")}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-        </TLayout>
-        <TLayout cols="1fr 1fr 1fr">
-          <TInput
-            label="Format"
-            name="format"
-            value={item.format}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-          <TInput
-            label="NIU"
-            name="niu"
-            value={item.niu}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-          <TInput
-            label="Registre de commerce"
-            name="registre_commerce"
-            value={(item.registre_commerce = "RCCM/YAO")}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-        </TLayout>
-        <TLayout cols="1fr 1fr 1fr">
-          <TInput
-            label="Telephone"
-            name="telephone"
-            value={item.telephone}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-          <TInput
-            label="Adresse Mail"
-            name="adresse_mail"
-            value={(item.adresse_mail = "contact@groupesia.com")}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-          <TInput
-            label="Site internet"
-            name="site_internet"
-            value={(item.site_internet = "groupesia.com")}
-            maxlength={60}
-            addChange={changeHandler}
-          />
-        </TLayout>
-      </TFormulaire>
-      <TValidationButton print={print} save={save} />
-    </div>
+          <TLayout cols="1fr 1fr">
+            <TInput
+              label="Raison sociale"
+              name="Raisonsocial"
+              value={item.Raisonsocial}
+              maxlength={10}
+              addChange={changeHandler}
+            />
+            <TInput
+              label="Adresse"
+              name="Adresse"
+              value={item.Adresse}
+              maxlength={60}
+              addChange={changeHandler}
+            />
+          </TLayout>
+          <TLayout cols="1fr 1fr 1fr 1fr">
+            <TInput
+              label="Ville"
+              name="Ville"
+              value={item.Ville}
+              maxlength={60}
+              addChange={changeHandler}
+            />
+            <TInput
+              label="Région"
+              name="Region"
+              value={item.Region}
+              maxlength={60}
+              addChange={changeHandler}
+            />
+            <TInput
+              label="Pays"
+              name="Pays"
+              value={item.Pays}
+              maxlength={60}
+              addChange={changeHandler}
+            />
+            <TInput
+              label="Monnaie"
+              name="Monnaie"
+              value={item.Monnaie}
+              maxlength={60}
+              addChange={changeHandler}
+            />
+          </TLayout>
+          <TLayout cols="1fr 1fr 1fr">
+            <TInput
+              label="Format"
+              name="Format"
+              value={item.Format}
+              maxlength={60}
+              addChange={changeHandler}
+            />
+            <TInput
+              label="NIU"
+              name="Niu"
+              value={item.Niu}
+              maxlength={60}
+              addChange={changeHandler}
+            />
+            <TInput
+              label="Registre de commerce"
+              name="Registrecommerce"
+              value={item.Registrecommerce}
+              maxlength={60}
+              addChange={changeHandler}
+            />
+          </TLayout>
+          <TLayout cols="1fr 1fr 1fr">
+            <TInput
+              label="Telephone"
+              name="Telephone"
+              value={item.Telephone}
+              maxlength={60}
+              addChange={changeHandler}
+            />
+            <TInput
+              label="Adresse Mail"
+              name="Adressemail"
+              value={item.Adressemail}
+              maxlength={60}
+              addChange={changeHandler}
+            />
+            <TInput
+              label="Site internet"
+              name="Siteinternet"
+              value={item.Siteinternet}
+              maxlength={60}
+              addChange={changeHandler}
+            />
+          </TLayout>
+        </TFormulaire>
+        <TValidationButton print={print} save={save} />
+      </div>
+    </>
   );
 };

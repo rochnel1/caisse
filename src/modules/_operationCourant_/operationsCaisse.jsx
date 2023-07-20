@@ -12,17 +12,18 @@ import {
 import { OOperation } from "../_administration_/_init_";
 import { api } from "../../utils/api";
 import { ENDPOINTS } from "../../utils/Variables";
-import { jsonDateConvert } from "../../utils/utils";
-import { GetCookie } from "../../utils/getCookies";
+import { ToastContainer, toast } from "react-toastify";
 
-//sens : 0 pour encaissement et 1 pour décaissement
 export const OperationCaisse = ({ children, sens = 0 }) => {
-  // Récupération de la chaîne JSON depuis le localStorage
   const objString = localStorage.getItem("myData");
-
-  // Conversion de la chaîne JSON en objet JavaScript
   const obj = JSON.parse(objString);
+  let etatCaisse = 0;
+  obj == null ? (etatCaisse = 0) : (etatCaisse = 1);
+  const notify = (msg) => toast.warning(msg);
 
+  if (typeof etatCaisse === "number" && etatCaisse === 0) {
+    notify("Veuillez ouvrir une caisse");
+  }
   useEffect(() => {
     console.log("myParameter has changed:", sens);
   }, [sens]);
@@ -32,7 +33,6 @@ export const OperationCaisse = ({ children, sens = 0 }) => {
       c6: `${sens === 0 ? "Encaissement" : "Décaissement"}`,
     },
   ]);
-  const [refresh, setRefresh] = useState(false);
 
   const [open, setOpen] = useState({
     frame: false,
@@ -40,146 +40,35 @@ export const OperationCaisse = ({ children, sens = 0 }) => {
     Idoperation: 0,
   });
 
-  const add = (e) => {
-    setOpen({ ...open, frame: true, sens: sens, Idoperation: 0 });
-  };
-
-  const print = (e) => {
-    // setOpen({ ...open, groupe: true });
-    console.log("Impression");
-  };
-  const modify = (id) => {
-    // console.log(id);
-    setOpen({ ...open, frame: true, Idoperation: id });
-  };
-
-  const quit = (e) => {
-    setOpen({ ...open, frame: false });
-  };
-
-  //hooks
-  const rafraichir = () => {
-    setRefresh(!refresh);
-  };
-
-  const loadItems = () => {
-    api(ENDPOINTS.operations)
-      .fetch()
-      .then((res) => {
-        let temp = res.data;
-        temp = temp.filter(
-          (o) => o.Sens == (sens == 0 ? "Encaissement" : "Décaissment")
-        );
-        setItems(temp);
-      })
-      .catch((err) => alert(err));
-  };
-
-  useEffect(() => {
-    loadItems();
-  }, [refresh, sens]);
-
-  //
-  const setBabalScript = (bab) => {
-    return <>{bab}</>;
-  };
-
   return (
     <>
-      <TFormList
-        title={`Liste des ${sens == 0 ? "encaissements" : "décaissements"}`}
-        options={
-          <TValidationButton add={add} print={print} refresh={rafraichir} />
-        }
-      >
-        <TTable
-          items={items}
-          columns={[
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdcaisseNavigation?.Codecaisse),
-            },
-            {
-              name: "",
-              render: (o) =>
-                setBabalScript(o.IdpersonnelNavigation?.Codepersonnel),
-            },
-            {
-              name: "Dateoperation",
-              render: (o) => new Date(o.Dateoperation).toLocaleString(),
-            },
-            { name: "Description" },
-            { name: "Montant" },
-            { name: "Sens" },
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdexerciceNavigation?.Code),
-            },
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdperiodeNavigation?.Codeperiode),
-            },
-            {
-              name: "",
-              render: (o) =>
-                setBabalScript(o.IdnatureoperationNavigation?.Codenature),
-            },
-            { name: "Etat" },
-          ]}
-          columnsDisplay={[
-            "Caisse ",
-            "Caissier",
-            "Date de l'opération",
-            "Description de l'opération",
-            "Montant de l'opération",
-            "Sens",
-            "Exercice",
-            "Période",
-            "Nature d'opération",
-            "Etat",
-          ]}
-          lineClick={(o) => {
-            modify(o.Idoperation);
-          }}
-        ></TTable>
-      </TFormList>
-
-      {open.frame && (
-        <TModal>
-          <EOperationCaisse
-            sens={open.sens}
-            addQuiHandler={quit}
-            itemId={open.Idoperation}
-            addRefreshHandler={rafraichir}
-          />
-        </TModal>
-      )}
+      <ToastContainer
+        autoClose={2500}
+        position="top-center"
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+      <EOperationCaisse sens={open.sens} itemId={open.Idoperation} />
     </>
   );
 };
 
-export const EOperationCaisse = ({
-  children,
-  sens = 0,
-  addQuiHandler,
-  itemId = 0,
-  addRefreshHandler,
-}) => {
+export const EOperationCaisse = ({ children, sens = 0 }) => {
   const [item, setItem] = useState(OOperation);
+  const notify = (msg) => toast.success(msg);
 
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
 
   const save = async (e) => {
-    console.log(itemId);
-    console.log(item.Idoperation);
-
     // Récupération de la chaîne JSON depuis le localStorage
     const objString = localStorage.getItem("myData");
-    //const objString = GetCookie("caisseData");
-
-    // Conversion de la chaîne JSON en objet JavaScript
     const obj = JSON.parse(objString);
     item.Idcaisse = obj.caisse;
     item.Idexercice = obj.exercice;
@@ -188,26 +77,16 @@ export const EOperationCaisse = ({
 
     sens === 0 ? (item.Sens = "Encaissement") : (item.Sens = "Décaissment");
     item.Etat = "OP";
-
-    if (item.Idoperation === 0) {
-      //nouvel enregistrement
-      item.Dateoperation = new Date();
-      delete item.Idoperation;
+    delete item.Idoperation;
+    delete item.Regularise;
+    delete item.Controlerpar;
+    try {
       await api(ENDPOINTS.operations).post(item);
-    } else {
-      //modification
-      await api(ENDPOINTS.operations).put(item.Idoperation, item);
+      notify("Opération ajoutée avec succès");
+    } catch (error) {
+      notify(error);
     }
     setItem({ ...OOperation });
-    if (addRefreshHandler) addRefreshHandler();
-    if (addQuiHandler) addQuiHandler();
-  };
-
-  const remove = async (e) => {
-    if (item.Idoperation === 0) return;
-    const res = await api(ENDPOINTS.operations).delete(item.Idoperation, item);
-    if (addRefreshHandler) addRefreshHandler(res);
-    if (addQuiHandler) addQuiHandler();
   };
 
   const [nature, setNature] = useState([]);
@@ -227,54 +106,58 @@ export const EOperationCaisse = ({
   };
 
   useEffect(() => {
-    setItem({ ...OOperation });
-    if (itemId !== 0) {
-      api(ENDPOINTS.operations)
-        .fetchById(itemId)
-        .then((res) => setItem(res.data))
-        .catch((err) => alert(err));
-    }
     loadItemsNature();
   }, []);
 
   return (
     <>
+      <ToastContainer
+        position="top-center"
+        autoClose={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        theme="dark"
+      />
       <TFormulaire
         title={`Enregistrer un ${sens === 0 ? "encaissement" : "décaissement"}`}
-        valPanel={
-          <TValidationButton
-            save={save}
-            remove={(e) => (item.Idoperation !== 0 ? remove() : undefined)}
-            cancel={addQuiHandler}
-          />
-        }
+        valPanel={<TValidationButton save={save} />}
       >
-        <TSelect
-          label="Nature de l'opération"
-          name="Idnatureoperation"
-          items={nature}
-          columnId="Idnatureoperation"
-          columnDisplay="Codenature"
-          value={item.Idnatureoperation}
-          maxlength={60}
-          addChange={changeHandler}
-        />
-
-        <TInput
-          type="textarea"
-          label="Description de l'opération"
-          name="Description"
-          value={item.Description}
-          addChange={changeHandler}
-        />
-
-        <TInput
-          label="Montant de l'opération"
-          name="Montant"
-          value={item.Montant}
-          maxlength={60}
-          addChange={changeHandler}
-        />
+        <TLayout cols="1fr 1fr 1fr 1fr">
+          <TSelect
+            label="Nature de l'opération"
+            name="Idnatureoperation"
+            items={nature}
+            columnId="Idnatureoperation"
+            columnDisplay="Codenature"
+            value={item.Idnatureoperation}
+            maxlength={60}
+            addChange={changeHandler}
+          />
+          <TInput
+            type="textarea"
+            label="Description de l'opération"
+            name="Description"
+            value={item.Description}
+            addChange={changeHandler}
+          />
+          <TInput
+            label="Montant de l'opération"
+            name="Montant"
+            value={item.Montant}
+            maxlength={60}
+            addChange={changeHandler}
+          />
+          <TInput
+            label="Date de création"
+            name="Dateoperation"
+            value={item.Dateoperation}
+            type="date"
+            addChange={changeHandler}
+          />
+        </TLayout>
 
         {children}
       </TFormulaire>

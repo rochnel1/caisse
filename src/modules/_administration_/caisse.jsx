@@ -11,12 +11,14 @@ import {
 } from "../../utils/__";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
+import { Load } from "../../utils/load";
 
 export const Caisses = ({ children }) => {
   const [items, setItems] = useState([]);
   //
   const [open, setOpen] = useState({ caisse: false, Idcaisse: 0 });
   const [refresh, setRefresh] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const add = (e) => {
     setOpen({ ...open, caisse: true, Idcaisse: 0 });
@@ -52,39 +54,47 @@ export const Caisses = ({ children }) => {
   };
 
   useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
     loadItems();
   }, [refresh]);
 
   return (
     <>
-      <TFormList
-        title="Liste des Caisses"
-        options={
-          <TValidationButton add={add} print={print} refresh={rafraichir} />
-        }
-      >
-        <TTable
-          items={items}
-          columns={[
-            { name: "Codecaisse" },
-            { name: "Descriptioncaisse" },
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdcompteNavigation?.Numcompte),
-            },
-            { name: "JournalComptable" },
-          ]}
-          columnsDisplay={[
-            "Code",
-            "Description",
-            "Compte Général",
-            "Journal Comptable",
-          ]}
-          lineClick={(o) => {
-            modify(o.Idcaisse);
-          }}
-        ></TTable>
-      </TFormList>
+      {loading ? (
+        <Load loading={loading} />
+      ) : (
+        <TFormList
+          title="Liste des Caisses"
+          options={
+            <TValidationButton add={add} print={print} refresh={rafraichir} />
+          }
+        >
+          <TTable
+            items={items}
+            columns={[
+              { name: "Codecaisse" },
+              { name: "Descriptioncaisse" },
+              {
+                name: "",
+                render: (o) => setBabalScript(o.IdcompteNavigation?.Numcompte),
+              },
+              { name: "JournalComptable" },
+            ]}
+            columnsDisplay={[
+              "Code",
+              "Description",
+              "Compte Général",
+              "Journal Comptable",
+            ]}
+            lineClick={(o) => {
+              modify(o.Idcaisse);
+            }}
+          ></TTable>
+        </TFormList>
+      )}
       {open.caisse && (
         <TModal>
           <ECaisse
@@ -157,6 +167,7 @@ export const ECaisse = ({
       valPanel={
         <TValidationButton
           add={save}
+          addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
           remove={(e) => (item.Idcaisse !== 0 ? remove() : undefined)}
           cancel={addQuiHandler}
         />

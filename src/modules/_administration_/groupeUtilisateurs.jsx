@@ -10,16 +10,21 @@ import {
 import { OGroupeUtilisateur } from "./_init_";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
+import { Alert } from "../_pagesNotFound/alert";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Load } from "../../utils/load";
 
 export const GroupesUtilisateurs = ({ children }) => {
   const [items, setItems] = useState([]);
-
+  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState({
     groupeUtilisateur: false,
     Idgpeutilisateur: 0,
   });
 
   const [refresh, setRefresh] = useState(false);
+  const notify = () => toast.warning("Serveur non disponible !");
 
   const add = (e) => {
     setOpen({ ...open, groupeUtilisateur: true, Idgpeutilisateur: 0 });
@@ -41,29 +46,40 @@ export const GroupesUtilisateurs = ({ children }) => {
   const loadGpeUtilisateurs = () => {
     api(ENDPOINTS.groupeUtilisateur)
       .fetch()
-      .then((res) => setItems(res.data))
-      .catch((err) => alert(err));
+      .then((res) => {
+        setItems(res.data);
+      })
+      .catch((err) => notify());
   };
+
   useEffect(() => {
-    // console.log("Code With Rochnel");
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
     loadGpeUtilisateurs();
   }, [refresh]);
 
   return (
     <>
-      <TFormList
-        title="Liste des groupes utilisateurs"
-        options={<TValidationButton add={add} refresh={rafraichir} />}
-      >
-        <TTable
-          items={items}
-          columns={[{ name: "Nomgroupe" }]}
-          columnsDisplay={["Nom du Groupe"]}
-          lineClick={(o) => {
-            modify(o.Idgpeutilisateur);
-          }}
-        ></TTable>
-      </TFormList>
+      <ToastContainer />
+      {loading ? (
+        <Load loading={loading} />
+      ) : (
+        <TFormList
+          title="Liste des groupes utilisateurs"
+          options={<TValidationButton add={add} refresh={rafraichir} />}
+        >
+          <TTable
+            items={items}
+            columns={[{ name: "Nomgroupe" }]}
+            columnsDisplay={["Nom du Groupe"]}
+            lineClick={(o) => {
+              modify(o.Idgpeutilisateur);
+            }}
+          ></TTable>
+        </TFormList>
+      )}
 
       {open.groupeUtilisateur && (
         <TModal>
@@ -128,12 +144,14 @@ export const EGroupeUtilisateur = ({
         .catch((err) => alert(err));
     }
   }, []);
+
   return (
     <TFormulaire
       title="Nouveau Groupe d'utlisateur"
       valPanel={
         <TValidationButton
           add={save}
+          addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
           remove={(e) =>
             itemGrp.Idgpeutilisateur !== 0 ? remove() : undefined
           }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { OComptabilisation } from "../_administration_/_init_";
+import { OComptabilisation, OOperation } from "../_administration_/_init_";
 import {
   TFormulaire,
   TLayout,
@@ -9,29 +9,12 @@ import {
   TValidationButton,
   TFormList,
 } from "../../utils/__";
+import DataTable from "react-data-table-component";
 
 export const Comptabilisation = ({ children }) => {
-  const [itemsExo, setItemsExo] = useState([
-    {
-      c1: "CAIS",
-      c2: "1",
-      c3: "31/12/2013",
-      c4: "58xxxx",
-      c5: "Réapprode la caisse",
-      c6: "100000",
-      c7: "",
-    },
-    {
-      c1: "CAIS",
-      c2: "1",
-      c3: "31/12/2013",
-      c4: "58xxxx",
-      c5: "Réapprode la caisse",
-      c6: "",
-      c7: "100000",
-    },
-  ]);
-  //
+  const [itemsExo, setItemsExo] = useState([]);
+  const [item, setItem] = useState(OOperation);
+  const [items, setItems] = useState([]);
   const [open, setOpen] = useState({ exercice: false });
 
   const add = (e) => {
@@ -51,39 +34,67 @@ export const Comptabilisation = ({ children }) => {
     setOpen({ ...open, exercice: false });
   };
 
+  const columns = [
+    {
+      name: "Journal comptable",
+      selector: (row) => row.caisse,
+    },
+    {
+      name: "N° de pièce",
+      selector: (row) => row.caissier,
+    },
+    {
+      name: "Date de pièce",
+      selector: (row) => new Date(row.date).toLocaleString(),
+    },
+    {
+      name: "Compte général",
+      selector: (row) => row.montant,
+    },
+    {
+      name: "Libellé de l'opération",
+      selector: (row) => row.nature,
+      sortable: true,
+    },
+    {
+      name: "Montant débit",
+      selector: (row) => row.sens,
+    },
+    {
+      name: "Montant crédit",
+      selector: (row) => row.etat,
+    },
+  ];
   return (
     <>
       <TFormList
         title="Comptabilisation des opérations de caisse"
-        options={
-          <TValidationButton add={add} print={print} validate={validate} />
-        }
+        options={<TValidationButton add={add} print={print} />}
       >
-        <TTable
-          items={itemsExo}
-          columns={["c1", "c2", "c3", "c4", "c5", "c6", "c7"]}
-          columnsDisplay={[
-            "Journal comptable",
-            "N° de pièce",
-            "Date de pièce",
-            "Compte général",
-            "Libellé de l'opération",
-            "Montant débit",
-            "Montant crédit",
-          ]}
-          // columnsWidth={["120px", "auto"]}
-        ></TTable>
+        <DataTable
+          columns={columns}
+          data={items}
+          pagination
+          fixedHeader
+          fixedHeaderScrollHeight="450px"
+          highlightOnHover
+          actions={
+            <button className="buttonAll" onClick={validate}>
+              Comptabiliser
+            </button>
+          }
+        />
       </TFormList>
       {open.exercice && (
         <TModal>
-          <EComptabilisation addQuiHandler={quit} />
+          <EComptabilisation addQuiHandler={quit} itemId={open.Idbudget} />
         </TModal>
       )}
     </>
   );
 };
 
-export const EComptabilisation = ({ children, addQuiHandler }) => {
+export const EComptabilisation = ({ children, addQuiHandler, itemId = 0 }) => {
   const [item, setItem] = useState(OComptabilisation);
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
@@ -94,7 +105,13 @@ export const EComptabilisation = ({ children, addQuiHandler }) => {
   return (
     <TFormulaire
       title="Nouvelle pièce compta"
-      valPanel={<TValidationButton add={save} cancel={addQuiHandler} />}
+      valPanel={
+        <TValidationButton
+          add={save}
+          addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
+          cancel={addQuiHandler}
+        />
+      }
     >
       <TLayout cols="1fr 1fr 1fr">
         <TInput

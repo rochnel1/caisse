@@ -11,10 +11,14 @@ import {
 } from "../../utils/__";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
+import { Load } from "../../utils/load";
+import { ToastContainer, toast } from "react-toastify";
 
 export const Personnel = ({ children }) => {
   const [open, setOpen] = useState({ personnel: false, Idpersonnel: 0 });
   const [refresh, setRefresh] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const add = (e) => {
     setOpen({ ...open, personnel: true, Idpersonnel: 0 });
   };
@@ -39,6 +43,10 @@ export const Personnel = ({ children }) => {
   };
 
   useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
     loadItems();
   }, [refresh]);
 
@@ -49,36 +57,38 @@ export const Personnel = ({ children }) => {
   const [items, setItems] = useState([]);
   return (
     <>
-      <TFormList
-        title="Liste du personnel"
-        options={<TValidationButton add={add} refresh={rafraichir} />}
-      >
-        <TTable
-          items={items}
-          columns={[
-            { name: "Codepersonnel" },
-            { name: "Nom" },
-            { name: "Prenom" },
-            { name: "Profil" },
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdcaisseNavigation?.Codecaisse),
-            },
-          ]}
-          columnsDisplay={[
-            "Code",
-            "Nom(s)",
-            "Prénom(s)",
-            "Profil(s)",
-            "caisse associée",
-          ]}
-          lineClick={(o) => {
-            modify(o.Idpersonnel);
-          }}
-          // columnsWidth={["120px", "auto"]}
-        ></TTable>
-      </TFormList>
-
+      {loading ? (
+        <Load loading={loading} />
+      ) : (
+        <TFormList
+          title="Liste du personnel"
+          options={<TValidationButton add={add} refresh={rafraichir} />}
+        >
+          <TTable
+            items={items}
+            columns={[
+              { name: "Codepersonnel" },
+              { name: "Nom" },
+              { name: "Prenom" },
+              { name: "Profil" },
+              {
+                name: "",
+                render: (o) => setBabalScript(o.IdcaisseNavigation?.Codecaisse),
+              },
+            ]}
+            columnsDisplay={[
+              "Code",
+              "Nom(s)",
+              "Prénom(s)",
+              "Profil(s)",
+              "caisse associée",
+            ]}
+            lineClick={(o) => {
+              modify(o.Idpersonnel);
+            }}
+          ></TTable>
+        </TFormList>
+      )}
       {open.personnel && (
         <TModal>
           <EPersonnel
@@ -102,6 +112,7 @@ export const EPersonnel = ({
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
+  const notify = (msg) => toast.success(msg);
 
   const save = async (e) => {
     if (item.Profil === "0") {
@@ -124,6 +135,7 @@ export const EPersonnel = ({
     setItem({ ...OPersonnel });
     if (addRefreshHandler) addRefreshHandler();
     if (addQuiHandler) addQuiHandler();
+    notify("Personnel ajoutée avec succès");
   };
 
   const remove = async (e) => {
@@ -157,62 +169,75 @@ export const EPersonnel = ({
   }, []);
 
   return (
-    <TFormulaire
-      title="Nouvelle personne"
-      valPanel={
-        <TValidationButton
-          add={save}
-          remove={(e) => (item.Idpersonnel !== 0 ? remove() : undefined)}
-          cancel={addQuiHandler}
+    <>
+      <ToastContainer
+        position="top-center"
+        autoClose={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        theme="dark"
+      />
+      <TFormulaire
+        title="Nouveau personnel"
+        valPanel={
+          <TValidationButton
+            add={save}
+            addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
+            remove={(e) => (item.Idpersonnel !== 0 ? remove() : undefined)}
+            cancel={addQuiHandler}
+          />
+        }
+      >
+        <TInput
+          label="Code"
+          name="Codepersonnel"
+          value={item.Codepersonnel}
+          maxlength={60}
+          addChange={changeHandler}
         />
-      }
-    >
-      <TInput
-        label="Code"
-        name="Codepersonnel"
-        value={item.Codepersonnel}
-        maxlength={60}
-        addChange={changeHandler}
-      />
-      <TInput
-        label="Nom(s)"
-        name="Nom"
-        value={item.Nom}
-        maxlength={60}
-        addChange={changeHandler}
-      />
-      <TInput
-        label="Prénom(s)"
-        name="Prenom"
-        value={item.Prenom}
-        maxlength={60}
-        addChange={changeHandler}
-      />
-      <TSelect
-        label="Profil(s)"
-        name="Profil"
-        items={[
-          { value: 0, label: "Caissier" },
-          { value: 1, label: "Contrôleur" },
-          { value: 2, label: "Comptable" },
-        ]}
-        columnId="value"
-        columnDisplay="label"
-        value={item.Profil}
-        maxlength={60}
-        addChange={changeHandler}
-      />
-      <TSelect
-        label="Caisse associée"
-        name="Idcaisse"
-        items={caisse}
-        columnId="Idcaisse"
-        columnDisplay="Codecaisse"
-        maxlength={60}
-        value={item.Idcaisse}
-        addChange={changeHandler}
-      />
-      {children}
-    </TFormulaire>
+        <TInput
+          label="Nom(s)"
+          name="Nom"
+          value={item.Nom}
+          maxlength={60}
+          addChange={changeHandler}
+        />
+        <TInput
+          label="Prénom(s)"
+          name="Prenom"
+          value={item.Prenom}
+          maxlength={60}
+          addChange={changeHandler}
+        />
+        <TSelect
+          label="Profil(s)"
+          name="Profil"
+          items={[
+            { value: 0, label: "Caissier" },
+            { value: 1, label: "Contrôleur" },
+            { value: 2, label: "Comptable" },
+          ]}
+          columnId="value"
+          columnDisplay="label"
+          value={item.Profil}
+          maxlength={60}
+          addChange={changeHandler}
+        />
+        <TSelect
+          label="Caisse associée"
+          name="Idcaisse"
+          items={caisse}
+          columnId="Idcaisse"
+          columnDisplay="Codecaisse"
+          maxlength={60}
+          value={item.Idcaisse}
+          addChange={changeHandler}
+        />
+        {children}
+      </TFormulaire>
+    </>
   );
 };

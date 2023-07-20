@@ -9,27 +9,20 @@ import {
 import { OInitBudget } from "../_administration_/_init_";
 import { api } from "../../utils/api";
 import { ENDPOINTS } from "../../utils/Variables";
+import DataTable from "react-data-table-component";
 
 export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
   const [items, setItems] = useState([]);
-  const [refresh, setRefresh] = useState(false);
   const [item, setItem] = useState(OInitBudget);
 
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
 
-  //hooks
-  const rafraichir = () => {
-    setRefresh(!refresh);
-  };
-
   const loadItems = () => {
     api(ENDPOINTS.budgetsRealisation)
       .fetch()
-      .then((res) => {
-        setItems(res.data);
-      })
+      .then((res) => setItems(res.data))
       .catch((err) => alert(err));
   };
 
@@ -50,9 +43,7 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
     idNat = item.Idnatureoperation;
     loadItemsFliter(idExo, idPer, idNat);
   };
-  const displayAll = async (e) => {
-    loadItems();
-  };
+
   const print = (e) => {
     idExo = item.Idexercice;
     idPer = item.Idperiode;
@@ -86,15 +77,44 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
   };
 
   useEffect(() => {
-    // setItem({ ...OInitBudget });
+    loadItems();
     loadItemsNature();
     loadItemsExercice();
     loadItemsPeriode();
   }, []);
 
   useEffect(() => {
-    loadItems();
-  }, []);
+    validate();
+  }, [item.Idexercice, item.Idperiode, item.Idnatureoperation]);
+
+  const columns = [
+    {
+      name: "Exercice",
+      selector: (row) => row.exercice,
+      sortable: true,
+    },
+    {
+      name: "Période",
+      selector: (row) => row.periode,
+      sortable: true,
+    },
+    {
+      name: "Nature",
+      selector: (row) => row.nature,
+    },
+    {
+      name: "Prévision",
+      selector: (row) => row.prevision,
+    },
+    {
+      name: "Réalisations",
+      selector: (row) => row.realisation,
+    },
+    {
+      name: "Ecart",
+      selector: (row) => row.ecart,
+    },
+  ];
 
   return (
     <>
@@ -131,35 +151,22 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
             />
           </TLayout>
         </TFormulaire>
-
-        <div className="center-TValidationButton">
-          <TValidationButton
-            print={print}
-            validate={validate}
-            all={displayAll}
+        <div>
+          <DataTable
+            columns={columns}
+            data={items}
+            pagination
+            fixedHeader
+            fixedHeaderScrollHeight="450px"
+            highlightOnHover
+            actions={
+              <button className="buttonAll" onClick={print}>
+                Imprimer
+              </button>
+            }
           />
         </div>
       </div>
-
-      <TTable
-        items={items}
-        columns={[
-          { name: "exercice" },
-          { name: "periode" },
-          { name: "nature" },
-          { name: "prevision" },
-          { name: "realisation" },
-          { name: "ecart" },
-        ]}
-        columnsDisplay={[
-          "Exercice",
-          "Période",
-          "Nature",
-          "Prévision",
-          "Réalisations",
-          "Ecart",
-        ]}
-      ></TTable>
     </>
   );
 };

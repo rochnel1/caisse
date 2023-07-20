@@ -12,6 +12,7 @@ import {
 import { OPlanComptable } from "./_init_";
 import { api } from "../../utils/api";
 import { ENDPOINTS } from "../../utils/Variables";
+import { Load } from "../../utils/load";
 
 export const PlanComptable = () => {
   const [items, setItems] = useState([]);
@@ -20,6 +21,8 @@ export const PlanComptable = () => {
     planComptable: false,
     Idcompte: 0,
   });
+  const [loading, setLoading] = useState(false);
+
   const add = (e) => {
     setOpen({ ...open, planComptable: true, Idcompte: 0 });
   };
@@ -49,26 +52,33 @@ export const PlanComptable = () => {
   };
 
   useEffect(() => {
-    // console.log("Code With Rochnel");
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
     loadItems();
   }, [refresh]);
   return (
     <>
-      <TFormList
-        title="Liste des comptes généraux"
-        options={
-          <TValidationButton add={add} print={print} refresh={rafraichir} />
-        }
-      >
-        <TTable
-          items={items}
-          columns={[{ name: "Numcompte" }, { name: "Intitule" }]}
-          columnsDisplay={["N° de Compte", "Intitulé"]}
-          lineClick={(o) => {
-            modify(o.Idcompte);
-          }}
-        ></TTable>
-      </TFormList>
+      {loading ? (
+        <Load loading={loading} />
+      ) : (
+        <TFormList
+          title="Liste des comptes généraux"
+          options={
+            <TValidationButton add={add} print={print} refresh={rafraichir} />
+          }
+        >
+          <TTable
+            items={items}
+            columns={[{ name: "Numcompte" }, { name: "Intitule" }]}
+            columnsDisplay={["N° de Compte", "Intitulé"]}
+            lineClick={(o) => {
+              modify(o.Idcompte);
+            }}
+          ></TTable>
+        </TFormList>
+      )}
       {open.planComptable && (
         <TModal>
           <EPlanComptable
@@ -134,6 +144,7 @@ export const EPlanComptable = ({
       valPanel={
         <TValidationButton
           add={save}
+          addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
           remove={(e) => (item.Idcompte !== 0 ? remove() : undefined)}
           cancel={addQuiHandler}
         />

@@ -13,10 +13,13 @@ import {
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
 import { jsonDateConvert } from "../../utils/utils";
+import { Load } from "../../utils/load";
 
 export const Exercices = ({ children }) => {
   const [items, setItems] = useState([]);
   const [refresh, setRefresh] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   //
   const [open, setOpen] = useState({
     exercice: false,
@@ -53,44 +56,52 @@ export const Exercices = ({ children }) => {
   };
 
   useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
     loadItems();
   }, [refresh]);
 
   return (
     <>
-      <TFormList
-        title="Liste des exercices"
-        options={
-          <TValidationButton add={add} print={print} refresh={rafraichir} />
-        }
-      >
-        <TTable
-          items={items}
-          columns={[
-            { name: "Code" },
-            {
-              name: "Datedebut",
-              render: (o) => new Date(o.Datedebut).toLocaleString(),
-            },
-            {
-              name: "Datefin",
-              render: (o) => new Date(o.Datefin).toLocaleString(),
-            },
-            { name: "Statut", render: (o) => (o.Statut ? "En cours" : "") },
-            { name: "Cloture", render: (o) => (o.Cloture ? "Oui" : "Non") },
-          ]}
-          columnsDisplay={[
-            "Code",
-            "Date de Début",
-            "Date de Fin",
-            "Statut",
-            "Cloturé",
-          ]}
-          lineClick={(o) => {
-            modify(o.Idexercice, o.Code);
-          }}
-        ></TTable>
-      </TFormList>
+      {loading ? (
+        <Load loading={loading} />
+      ) : (
+        <TFormList
+          title="Liste des exercices"
+          options={
+            <TValidationButton add={add} print={print} refresh={rafraichir} />
+          }
+        >
+          <TTable
+            items={items}
+            columns={[
+              { name: "Code" },
+              {
+                name: "Datedebut",
+                render: (o) => new Date(o.Datedebut).toLocaleString(),
+              },
+              {
+                name: "Datefin",
+                render: (o) => new Date(o.Datefin).toLocaleString(),
+              },
+              { name: "Statut", render: (o) => (o.Statut ? "En cours" : "") },
+              { name: "Cloture", render: (o) => (o.Cloture ? "Oui" : "Non") },
+            ]}
+            columnsDisplay={[
+              "Code",
+              "Date de Début",
+              "Date de Fin",
+              "Statut",
+              "Cloturé",
+            ]}
+            lineClick={(o) => {
+              modify(o.Idexercice, o.Code);
+            }}
+          ></TTable>
+        </TFormList>
+      )}
       {open.exercice && (
         <TModal>
           <EExercices
@@ -164,6 +175,7 @@ export const EExercices = ({
       valPanel={
         <TValidationButton
           add={save}
+          addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
           cancel={addQuiHandler}
           remove={(e) => (item.Idexercice !== 0 ? remove() : undefined)}
         />
@@ -374,6 +386,7 @@ export const EPeriodes = ({
       valPanel={
         <TValidationButton
           add={save}
+          addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
           cancel={addQuiHandler}
           remove={(e) => (item.Idperiode !== 0 ? remove() : undefined)}
         />

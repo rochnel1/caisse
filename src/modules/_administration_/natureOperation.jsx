@@ -11,10 +11,12 @@ import {
 } from "../../utils/__";
 import { api } from "../../utils/api";
 import { ENDPOINTS } from "../../utils/Variables";
+import { Load } from "../../utils/load";
 
 export const NatureOperation = ({ children }) => {
   const [items, setItems] = useState([]);
   const [refresh, setRefresh] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [open, setOpen] = useState({ natureOp: false, Idnatureoperation: 0 });
 
@@ -42,7 +44,10 @@ export const NatureOperation = ({ children }) => {
       .catch((err) => alert(err));
   };
   useEffect(() => {
-    // console.log("Code With Rochnel");
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
     loadItems();
   }, [refresh]);
 
@@ -51,47 +56,50 @@ export const NatureOperation = ({ children }) => {
   };
   return (
     <>
-      <TFormList
-        title="Liste des natures d'opérations"
-        options={<TValidationButton add={add} refresh={rafraichir} />}
-      >
-        <TTable
-          items={items}
-          columns={[
-            { name: "Codenature" },
-            { name: "Description" },
-            {
-              name: "",
-              render: (o) => setBabalScript(o.IdcompteNavigation?.Numcompte),
-            },
-            {
-              name: "Typenature",
-              render: (o) =>
-                o.Typenature == 0 ? "Opération" : "Régularisation",
-            },
-            {
-              name: "Sensnature",
-              render: (o) =>
-                o.Sensnature == 0
-                  ? "Encaissement"
-                  : o.Sensnature == 1
-                  ? "Décaissement"
-                  : "Les deux",
-            },
-          ]}
-          columnsDisplay={[
-            "Code",
-            "Description",
-            "Compte général associé",
-            "Type de nature",
-            "Sens",
-          ]}
-          lineClick={(o) => {
-            modify(o.Idnatureoperation);
-          }}
-        ></TTable>
-      </TFormList>
-
+      {loading ? (
+        <Load loading={loading} />
+      ) : (
+        <TFormList
+          title="Liste des natures d'opérations"
+          options={<TValidationButton add={add} refresh={rafraichir} />}
+        >
+          <TTable
+            items={items}
+            columns={[
+              { name: "Codenature" },
+              { name: "Description" },
+              {
+                name: "",
+                render: (o) => setBabalScript(o.IdcompteNavigation?.Numcompte),
+              },
+              {
+                name: "Typenature",
+                render: (o) =>
+                  o.Typenature == 0 ? "Opération" : "Régularisation",
+              },
+              {
+                name: "Sensnature",
+                render: (o) =>
+                  o.Sensnature == 0
+                    ? "Encaissement"
+                    : o.Sensnature == 1
+                    ? "Décaissement"
+                    : "Les deux",
+              },
+            ]}
+            columnsDisplay={[
+              "Code",
+              "Description",
+              "Compte général associé",
+              "Type de nature",
+              "Sens",
+            ]}
+            lineClick={(o) => {
+              modify(o.Idnatureoperation);
+            }}
+          ></TTable>
+        </TFormList>
+      )}
       {open.natureOp && (
         <TModal>
           <ENatureOperation
@@ -164,12 +172,14 @@ export const ENatureOperation = ({
 
     loadItems();
   }, []);
+
   return (
     <TFormulaire
       title="Nouvelle nature d'opération"
       valPanel={
         <TValidationButton
           add={save}
+          addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
           remove={(e) => (item.Idnatureoperation !== 0 ? remove() : undefined)}
           cancel={addQuiHandler}
         />

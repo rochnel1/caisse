@@ -30,20 +30,7 @@ export const FermetureCaisse = ({ children }) => {
       <TFormList
         title="Fermeture de la caisse"
         options={<TValidationButton close={close} />}
-      >
-        {/* <TTable
-          items={items}
-          columns={["c1", "c2", "c3", "c4", "c5"]}
-          columnsDisplay={[
-            "Caisse",
-            "Caissier",
-            "Exercice",
-            "Période",
-            "Compte de caisse",
-          ]}
-          // columnsWidth={["120px", "auto"]}
-        ></TTable> */}
-      </TFormList>
+      ></TFormList>
       <br />
       {showCloseMessage && <div className="close-message">Caisse Fermée !</div>}
       {!showCloseMessage && (
