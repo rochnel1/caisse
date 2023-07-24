@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
 import {
-  TDataTable,
-  TFormList,
   TFormulaire,
   TInput,
   TLayout,
   TModal,
   TSelect,
-  TTable,
   TValidationButton,
 } from "../../utils/__";
 import { OOperation } from "../_administration_/_init_";
@@ -126,7 +123,6 @@ export const ControleCaisse = ({ children, idPer, idCaiss }) => {
       selector: (row) => row.etat,
     },
   ];
-
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("fr-CM", {
       style: "currency",

@@ -36,7 +36,7 @@ export const Comptabilisation = ({ children }) => {
 
   const columns = [
     {
-      name: "Journal comptable",
+      name: "N° de pièce",
       selector: (row) => row.caisse,
     },
     {
@@ -67,10 +67,7 @@ export const Comptabilisation = ({ children }) => {
   ];
   return (
     <>
-      <TFormList
-        title="Comptabilisation des opérations de caisse"
-        options={<TValidationButton add={add} print={print} />}
-      >
+      <TFormList title="Comptabilisation des opérations de caisse">
         <DataTable
           columns={columns}
           data={items}
@@ -94,73 +91,17 @@ export const Comptabilisation = ({ children }) => {
   );
 };
 
-export const EComptabilisation = ({ children, addQuiHandler, itemId = 0 }) => {
+export const EComptabilisation = ({ children, addQuiHandler }) => {
   const [item, setItem] = useState(OComptabilisation);
-  const changeHandler = (e) => {
-    setItem({ ...item, [e.target.name]: e.target.value });
-  };
+
   const save = (e) => {
     console.log(item);
   };
   return (
-    <TFormulaire
-      title="Nouvelle pièce compta"
-      valPanel={
-        <TValidationButton
-          add={save}
-          addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
-          cancel={addQuiHandler}
-        />
-      }
-    >
-      <TLayout cols="1fr 1fr 1fr">
-        <TInput
-          label="Journal comptable"
-          name="journalCompta"
-          value={item.journalCompta}
-          maxlength={60}
-          addChange={changeHandler}
-        />
-        <TInput
-          label="Numéro de pièce"
-          name="numPiece"
-          value={item.numPiece}
-          maxlength={60}
-          addChange={changeHandler}
-        />
-        <TInput
-          type="date"
-          label="Date de pièce"
-          name="date_piece"
-          value={item.date_piece}
-          maxlength={60}
-          addChange={changeHandler}
-        />
-      </TLayout>
-
-      <TInput
-        label="Libellé de l'opération"
-        name="libeblleOperation"
-        value={item.libeblleOperation}
-        maxlength={60}
-        addChange={changeHandler}
-      />
-      <TLayout cols="1fr 1fr">
-        <TInput
-          label="Montant débit"
-          name="montant_debit"
-          value={item.montant_debit}
-          maxlength={60}
-          addChange={changeHandler}
-        />
-        <TInput
-          label="Montant crédit"
-          name="montant_credit"
-          value={item.montant_credit}
-          maxlength={60}
-          addChange={changeHandler}
-        />
-      </TLayout>
+    <TFormulaire title="Comptabilser les pièces compta">
+      <div className="centered">
+        <TValidationButton validate={save} cancel={addQuiHandler} />
+      </div>
 
       {children}
     </TFormulaire>
