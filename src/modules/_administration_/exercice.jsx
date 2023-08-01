@@ -59,7 +59,7 @@ export const Exercices = ({ children }) => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-    }, 2000);
+    }, 1000);
     loadItems();
   }, [refresh]);
 

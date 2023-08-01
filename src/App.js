@@ -20,14 +20,23 @@ import NotFound from "./modules/_pagesNotFound/notFound";
 import EtatsBudgetaire from "./modules/_etats_/etatsBudgetaire";
 import { PlanComptable } from "./modules/_administration_/planComptable";
 import { HistoriqueOperations } from "./modules/_etats_/historiqueOperations";
+import { Login } from "./modules/_authentification/login";
+import { Register } from "./modules/_authentification/register";
+import { useEffect, useState } from "react";
 
 function App() {
+  const [state, setState] = useState(false);
+
+  useEffect(() => {
+    const objString = localStorage.getItem("connection");
+    const obj = JSON.parse(objString);
+    obj == null || obj.etat !== "off" ? setState(true) : setState(false);
+  });
   return (
     <BrowserRouter>
       <Main>
         <Routes>
           {/* Route pour la partie administration */}
-
           <Route exact path="/" element={<Utilisateurs />} />
           <Route exact path="*" element={<NotFound />} />
           <Route exact path="/groupe_users" element={<GroupesUtilisateurs />} />
@@ -70,6 +79,9 @@ function App() {
           {/* Route pour la partie etats*/}
           <Route exact path="/etats_budget" element={<EtatsBudgetaire />} />
           <Route exact path="/historique" element={<HistoriqueOperations />} />
+
+          <Route exact path="/login" element={<Login />} />
+          <Route exact path="/signUp" element={<Register />} />
         </Routes>
       </Main>
     </BrowserRouter>

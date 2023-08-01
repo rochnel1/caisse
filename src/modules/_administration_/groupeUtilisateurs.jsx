@@ -10,7 +10,6 @@ import {
 import { OGroupeUtilisateur } from "./_init_";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
-import { Alert } from "../_pagesNotFound/alert";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Load } from "../../utils/load";
@@ -24,7 +23,7 @@ export const GroupesUtilisateurs = ({ children }) => {
   });
 
   const [refresh, setRefresh] = useState(false);
-  const notify = () => toast.warning("Serveur non disponible !");
+  const notify = (msg) => toast.warning(msg);
 
   const add = (e) => {
     setOpen({ ...open, groupeUtilisateur: true, Idgpeutilisateur: 0 });
@@ -49,14 +48,14 @@ export const GroupesUtilisateurs = ({ children }) => {
       .then((res) => {
         setItems(res.data);
       })
-      .catch((err) => notify());
+      .catch((err) => notify(err));
   };
 
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-    }, 2000);
+    }, 1000);
     loadGpeUtilisateurs();
   }, [refresh]);
 

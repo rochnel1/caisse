@@ -1,6 +1,7 @@
 export const OUtilisateur = {
   IdUtilisateur: 0,
   Login: "",
+  Password: "",
   Nomutilisateur: "",
   Prenomutilisateur: "",
   Idgpeutilisateur: 0,
@@ -75,8 +76,8 @@ export const OInitBudget = {
 };
 
 export const OGeneralite = {
+  Idgeneralite: 0,
   Raisonsocial: "",
-  nom_commercial: "",
   Adresse: "",
   Ville: "",
   Region: "",

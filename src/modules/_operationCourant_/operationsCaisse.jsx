@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
-  TFormList,
   TFormulaire,
   TInput,
   TLayout,
-  TModal,
   TSelect,
-  TTable,
   TValidationButton,
 } from "../../utils/__";
 import { OOperation } from "../_administration_/_init_";
@@ -17,13 +14,16 @@ import { ToastContainer, toast } from "react-toastify";
 export const OperationCaisse = ({ children, sens = 0 }) => {
   const objString = localStorage.getItem("myData");
   const obj = JSON.parse(objString);
+
   let etatCaisse = 0;
   obj == null ? (etatCaisse = 0) : (etatCaisse = 1);
   const notify = (msg) => toast.warning(msg);
+  const notifySuccess = (msg) => toast.success(msg);
 
   if (typeof etatCaisse === "number" && etatCaisse === 0) {
     notify("Veuillez ouvrir une caisse");
   }
+
   useEffect(() => {
     console.log("myParameter has changed:", sens);
   }, [sens]);
@@ -34,33 +34,7 @@ export const OperationCaisse = ({ children, sens = 0 }) => {
     },
   ]);
 
-  const [open, setOpen] = useState({
-    frame: false,
-    sens: sens,
-    Idoperation: 0,
-  });
-
-  return (
-    <>
-      <ToastContainer
-        autoClose={2500}
-        position="top-center"
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
-      <EOperationCaisse sens={open.sens} itemId={open.Idoperation} />
-    </>
-  );
-};
-
-export const EOperationCaisse = ({ children, sens = 0 }) => {
   const [item, setItem] = useState(OOperation);
-  const notify = (msg) => toast.success(msg);
 
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
@@ -81,12 +55,12 @@ export const EOperationCaisse = ({ children, sens = 0 }) => {
     delete item.Regularise;
     delete item.Controlerpar;
     try {
-      await api(ENDPOINTS.operations).post(item);
-      notify("Opération ajoutée avec succès");
-    } catch (error) {
-      notify(error);
-    }
+      await api(ENDPOINTS.operations)
+        .post(item)
+        .then((result) => notifySuccess(result.data));
+    } catch (error) {}
     setItem({ ...OOperation });
+    notifySuccess("Opération enregistrées avec succès");
   };
 
   const [nature, setNature] = useState([]);
@@ -107,20 +81,10 @@ export const EOperationCaisse = ({ children, sens = 0 }) => {
 
   useEffect(() => {
     loadItemsNature();
-  }, []);
+  }, [sens]);
 
   return (
     <>
-      <ToastContainer
-        position="top-center"
-        autoClose={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        theme="dark"
-      />
       <TFormulaire
         title={`Enregistrer un ${sens === 0 ? "encaissement" : "décaissement"}`}
         valPanel={<TValidationButton save={save} />}
@@ -158,10 +122,19 @@ export const EOperationCaisse = ({ children, sens = 0 }) => {
             addChange={changeHandler}
           />
         </TLayout>
-
         {children}
       </TFormulaire>
-      {children}
+
+      <ToastContainer
+        autoClose={1200}
+        position="top-center"
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </>
   );
 };

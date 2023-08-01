@@ -54,6 +54,19 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
   const [exercice, setExercice] = useState([]);
   const [nature, setNature] = useState([]);
   const [periode, setPeriode] = useState([]);
+  const changeHandlerExercie = (e) => {
+    let temp = cPeriode;
+    temp = temp.filter(
+      (o) => o.IdexerciceNavigation.Idexercice == e.target.value
+    );
+    let Obj = item;
+    Obj[e.target.name] = e.target.value;
+    Obj["Idperiode"] = "";
+    setItem({ ...item, [e.target.name]: e.target.value, Idperiode: "" });
+    setPeriode(temp);
+  };
+
+  const [cPeriode, setCPeriode] = useState([]);
 
   const loadItemsExercice = () => {
     api(ENDPOINTS.exercices)
@@ -65,7 +78,7 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
   const loadItemsPeriode = () => {
     api(ENDPOINTS.periodes)
       .fetch()
-      .then((res) => setPeriode(res.data))
+      .then((res) => setCPeriode(res.data))
       .catch((err) => alert(err));
   };
 
@@ -128,7 +141,7 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
               columnId="Idexercice"
               columnDisplay="Code"
               value={item.Idexercice}
-              addChange={changeHandler}
+              addChange={changeHandlerExercie}
             />
             <TSelect
               label="Periode"

@@ -75,7 +75,13 @@ export const ControleCaisse = ({ children, idPer, idCaiss }) => {
         let temp = res.data;
         temp = temp.filter((o) => o.etat == "OP");
         setItems(temp);
-        const sum = temp.reduce((acc, op) => acc + op.montant, 0);
+        console.log(temp);
+
+        const sum = temp.reduce(
+          (acc, op) =>
+            acc + (op.sens == "Décaissment" ? -1 * op.montant : op.montant),
+          0
+        );
         setMontantTotal(sum);
         console.log("Prix total est : ", sum);
       })
@@ -206,6 +212,7 @@ export const EControleCaisse = ({
   montantEnreg = 0,
 }) => {
   const [item, setItem] = useState(OOperation);
+  const [open, setOpen] = useState(false);
 
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
@@ -213,6 +220,7 @@ export const EControleCaisse = ({
 
   const changeCheckboxHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.checked });
+    setOpen(!open);
   };
 
   const save = async (e) => {
@@ -261,6 +269,20 @@ export const EControleCaisse = ({
   const [periode, setPeriode] = useState([]);
   const [nature, setNature] = useState([]);
 
+  const changeHandlerExercie = (e) => {
+    let temp = cPeriode;
+    temp = temp.filter(
+      (o) => o.IdexerciceNavigation.Idexercice == e.target.value
+    );
+    let Obj = item;
+    Obj[e.target.name] = e.target.value;
+    Obj["Idperiode"] = "";
+    setItem({ ...item, [e.target.name]: e.target.value, Idperiode: "" });
+    setPeriode(temp);
+  };
+
+  const [cPeriode, setCPeriode] = useState([]);
+
   const loadItemsControleur = () => {
     api(ENDPOINTS.personnels)
       .fetch()
@@ -288,10 +310,11 @@ export const EControleCaisse = ({
       .then((res) => setExercice(res.data))
       .catch((err) => alert(err));
   };
+
   const loadItemsPeriode = () => {
     api(ENDPOINTS.periodes)
       .fetch()
-      .then((res) => setPeriode(res.data))
+      .then((res) => setCPeriode(res.data))
       .catch((err) => alert(err));
   };
 
@@ -308,46 +331,17 @@ export const EControleCaisse = ({
         title="Indiquer le contrôleur de caisse"
         valPanel={<TValidationButton validate={save} cancel={addQuiHandler} />}
       >
-        <TLayout cols="1fr 1fr 1fr 1fr">
-          <TSelect
-            label="Contrôleur"
-            name="Controlerpar"
-            items={controleur}
-            columnId="Idpersonnel"
-            columnDisplay="Codepersonnel"
-            value={item.Controlerpar}
-            addChange={changeHandler}
-          />
-          <TSelect
-            label="Exercice"
-            name="Idexercice"
-            items={exercice}
-            columnId="Idexercice"
-            columnDisplay="Code"
-            value={item.Idexercice}
-            addChange={changeHandler}
-          />
-          <TSelect
-            label="Periode"
-            name="Idperiode"
-            items={periode}
-            columnId="Idperiode"
-            columnDisplay="Codeperiode"
-            value={item.Idperiode}
-            addChange={changeHandler}
-          />
-          <TSelect
-            label="Nature de régularisation"
-            name="Idnatureoperation"
-            items={nature}
-            columnId="Idnatureoperation"
-            columnDisplay="Codenature"
-            value={item.Idnatureoperation}
-            addChange={changeHandler}
-          />
-        </TLayout>
+        <TSelect
+          label="Contrôleur"
+          name="Controlerpar"
+          items={controleur}
+          columnId="Idpersonnel"
+          columnDisplay="Codepersonnel"
+          value={item.Controlerpar}
+          addChange={changeHandler}
+        />
 
-        <TLayout cols="1fr 1fr">
+        <TLayout cols="1fr 1fr 1fr">
           <TInput
             label="Montant théorique"
             name="montantEnreg"
@@ -363,16 +357,56 @@ export const EControleCaisse = ({
             maxlength={10}
             addChange={changeHandler}
           />
+          <TInput
+            label="Ecart"
+            disable={true}
+            value={item.MontantPercu - montantEnreg}
+            maxlength={10}
+            addChange={changeHandler}
+          />
         </TLayout>
+        <div className="centered">
+          <TInput
+            label="Regulariser"
+            type="checkbox"
+            name="Regularise"
+            value={item.Regularise}
+            maxlength={60}
+            addChange={changeCheckboxHandler}
+          />
+        </div>
+        {open && (
+          <TLayout cols="1fr 1fr 1fr">
+            <TSelect
+              label="Exercice"
+              name="Idexercice"
+              items={exercice}
+              columnId="Idexercice"
+              columnDisplay="Code"
+              value={item.Idexercice}
+              addChange={changeHandlerExercie}
+            />
+            <TSelect
+              label="Periode"
+              name="Idperiode"
+              items={periode}
+              columnId="Idperiode"
+              columnDisplay="Codeperiode"
+              value={item.Idperiode}
+              addChange={changeHandler}
+            />
+            <TSelect
+              label="Nature de régularisation"
+              name="Idnatureoperation"
+              items={nature}
+              columnId="Idnatureoperation"
+              columnDisplay="Codenature"
+              value={item.Idnatureoperation}
+              addChange={changeHandler}
+            />
+          </TLayout>
+        )}
 
-        <TInput
-          label="Regulariser"
-          type="checkbox"
-          name="Regularise"
-          value={item.Regularise}
-          maxlength={60}
-          addChange={changeCheckboxHandler}
-        />
         {children}
       </TFormulaire>
     </>

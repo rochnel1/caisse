@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "react-icons/bs";
+import "react-icons/ci";
+import "react-icons/im";
 import {
   BsBarChartLineFill,
   BsCardChecklist,
@@ -23,15 +25,44 @@ import {
   FaWrench,
 } from "react-icons/fa";
 import { TGroupeMenu } from "../../utils/__";
-
 import "react-icons/gi";
-import { GiPayMoney, GiReceiveMoney } from "react-icons/gi";
+import { GiHamburgerMenu, GiPayMoney, GiReceiveMoney } from "react-icons/gi";
+import { CiLogout } from "react-icons/ci";
+import Swal from "sweetalert2";
+import { Link } from "react-router-dom";
 
 function Main({ children }) {
   const [menu, setMenu] = useState(false);
+  const [logout, setLogOut] = useState(false);
+
   const setMenuOpenClose = (e) => {
     setMenu(!menu);
   };
+
+  const LogOut = (e) => {
+    Swal.fire({
+      title: "Vous allez être déconnecter",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Oui",
+      cancelButtonText: "Non",
+    }).then((result) => {
+      if (result.value) {
+        signOut();
+        <Link to="/login" />;
+      }
+    });
+  };
+  const signOut = () => {
+    // Enregistrement de l'objet dans le localStorage
+    const obj = {
+      etat: "off",
+    };
+    localStorage.setItem("connexion", JSON.stringify(obj));
+  };
+
   return (
     <>
       <div className="appli">
@@ -40,14 +71,24 @@ function Main({ children }) {
             <nav>
               <nav className="logo">
                 <button title="Afficher le menu" onClick={setMenuOpenClose}>
-                  Caisse
+                  <GiHamburgerMenu />
+                  Menu
                 </button>
               </nav>
             </nav>
             <nav className="logo">
               <i>Gestion de la caisse courante</i>
             </nav>
-            <nav>Options</nav>
+            <nav>
+              <button
+                title="Se déconnecter de l'application"
+                onClick={LogOut}
+                className="buttonAll"
+              >
+                <CiLogout />
+                Se Déconnecter
+              </button>
+            </nav>
           </div>
           {menu && (
             <div className="menu">
@@ -72,13 +113,6 @@ function Main({ children }) {
                     label: "Généralités",
                     url: "/generalites",
                     icon: <FaWrench />,
-                  },
-                  { line: true },
-                  {
-                    active: true,
-                    label: "Exercice",
-                    url: "/exercices",
-                    icon: <FaCalendar />,
                   },
                   { line: true },
                   {
@@ -167,6 +201,13 @@ function Main({ children }) {
                     url: "/init_budgets",
                     icon: <FaUniversity />,
                   },
+                  {
+                    active: true,
+                    label: "Exercice",
+                    url: "/exercices",
+                    icon: <FaCalendar />,
+                  },
+                  { line: true },
                   {
                     active: true,
                     label: "Suivi des réalisations",

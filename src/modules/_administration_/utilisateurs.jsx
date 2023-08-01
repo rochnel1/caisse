@@ -48,7 +48,7 @@ export const Utilisateurs = ({ children }) => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-    }, 2000);
+    }, 1000);
     loadItems();
   }, [refresh]);
 
@@ -59,7 +59,15 @@ export const Utilisateurs = ({ children }) => {
 
   return (
     <>
-      <ToastContainer />
+      <ToastContainer
+        position="top-center"
+        autoClose={2000}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+      />
       {loading ? (
         <Load loading={loading} />
       ) : (
@@ -166,17 +174,6 @@ export const EUtilisateur = ({
 
   return (
     <>
-      <ToastContainer
-        position="top-center"
-        autoClose={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        theme="dark"
-      />
-      ;
       <TFormulaire
         title="Nouvel Utilisateur"
         valPanel={
@@ -211,7 +208,13 @@ export const EUtilisateur = ({
             addChange={changeHandler}
           />
         </TLayout>
-
+        <TInput
+          label="Mot de passe"
+          name="Password"
+          value={item.Password}
+          maxlength={60}
+          addChange={changeHandler}
+        />
         <TSelect
           label="Groupe d'utilisateur"
           name="Idgpeutilisateur"

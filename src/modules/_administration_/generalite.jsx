@@ -9,18 +9,36 @@ import {
 import { OGeneralite } from "./_init_";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
+import { ToastContainer, toast } from "react-toastify";
 
 export const Generalite = ({ children }) => {
   const [item, setItem] = useState(OGeneralite);
+  const notifySuccess = (msg) => toast.success(msg);
 
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
 
   const save = async (e) => {
-    delete item.nom_commercial;
-    await api(ENDPOINTS.generalites).post(item);
+    delete item.Idgeneralite;
+    delete item.Monnaie;
+    console.log(item);
+    await api(ENDPOINTS.generalites)
+      .post(item)
+      .then((result) => notifySuccess(result.data));
   };
+
+  useEffect(() => {
+    setItem({ ...OGeneralite });
+    api(ENDPOINTS.generalites)
+      .fetchById(6)
+      .then((res) => {
+        setItem(res.data);
+        // item.Monnaie == "FCFA";
+      })
+      .catch((err) => alert(err));
+    item.Monnaie = "FCFA";
+  }, []);
 
   const print = (e) => {
     console.log("Imprimer = " + item);
@@ -30,13 +48,6 @@ export const Generalite = ({ children }) => {
     <>
       <div>
         <TFormulaire title="Informations sur l'entreprise">
-          <TInput
-            label="Nom commercial"
-            name="nom_commercial"
-            value={item.nom_commercial}
-            maxlength={60}
-            addChange={changeHandler}
-          />
           <TLayout cols="1fr 1fr">
             <TInput
               label="Raison sociale"
@@ -132,6 +143,17 @@ export const Generalite = ({ children }) => {
         </TFormulaire>
         <TValidationButton print={print} save={save} />
       </div>
+      <ToastContainer
+        autoClose={1400}
+        position="top-center"
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+      ;
     </>
   );
 };

@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  TFormList,
-  TFormulaire,
-  TLayout,
-  TSelect,
-  TTable,
-  TValidationButton,
-} from "../../utils/__";
+import { TFormulaire, TLayout, TSelect } from "../../utils/__";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
 import { OOperation } from "../_administration_/_init_";
@@ -17,54 +10,53 @@ export const HistoriqueOperations = ({
   idExo,
   idPer,
   idNat,
-  idCaiss,
   sens,
 }) => {
   const [items, setItems] = useState([]);
   const [item, setItem] = useState(OOperation);
 
   const changeHandler = (e) => {
+    let temp = item;
+    temp[e.target.name] = e.target.value;
     setItem({ ...item, [e.target.name]: e.target.value });
+    validate(temp);
+  };
+
+  const changeHandlerExercie = (e) => {
+    let temp = cPeriode;
+    temp = temp.filter(
+      (o) => o.IdexerciceNavigation.Idexercice == e.target.value
+    );
+    let Obj = item;
+    Obj[e.target.name] = e.target.value;
+    Obj["Idperiode"] = "";
+    validate(Obj);
+    setItem({ ...item, [e.target.name]: e.target.value, Idperiode: "" });
+    setPeriode(temp);
   };
 
   const loadItemsFilter = (idExo, idPer, idNat, sens) => {
-    if (idExo == 0 || idPer == 0 || idNat == 0 || sens == 0) {
-      setItems([]);
-      return;
-    }
     api(ENDPOINTS.operations)
       .fetchByIdsOp(idExo, idPer, idNat, sens)
       .then((res) => setItems(res.data))
       .catch((err) => alert(err));
   };
 
-  const loadItems = async () => {
-    api(ENDPOINTS.operations)
-      .fetch()
-      .then((res) => setItems(res.data))
-      .catch((err) => alert(err));
-  };
-
   const validate = async (e) => {
-    idExo = item.Idexercice;
-    idPer = item.Idperiode;
-    idNat = item.Idnatureoperation;
-    sens = item.Sens;
+    idExo = e.Idexercice == "" ? 0 : e.Idexercice;
+    idPer = e.Idperiode == "" ? 0 : e.Idperiode;
+    idNat = e.Idnatureoperation == "" ? 0 : e.Idnatureoperation;
+    sens = e.Sens == "" ? 2 : e.Sens;
     loadItemsFilter(idExo, idPer, idNat, sens);
   };
 
-  const print = (e) => {
-    idExo = item.Idexercice;
-    idPer = item.Idperiode;
-    idNat = item.Idnatureoperation;
-    idCaiss = item.Idcaisse;
-    sens = item.Sens;
-    console.log(idExo + " + " + idPer + " + " + idNat + " + " + sens);
-  };
+  const print = (e) => {};
 
   const [exercice, setExercice] = useState([]);
   const [nature, setNature] = useState([]);
   const [periode, setPeriode] = useState([]);
+
+  const [cPeriode, setCPeriode] = useState([]);
 
   const loadItemsExercice = () => {
     api(ENDPOINTS.exercices)
@@ -76,7 +68,10 @@ export const HistoriqueOperations = ({
   const loadItemsPeriode = () => {
     api(ENDPOINTS.periodes)
       .fetch()
-      .then((res) => setPeriode(res.data))
+      .then((res) => {
+        setCPeriode([...res.data]);
+        console.log(res.data);
+      })
       .catch((err) => alert(err));
   };
 
@@ -88,20 +83,16 @@ export const HistoriqueOperations = ({
   };
 
   useEffect(() => {
-    loadItems();
+    // loadItems();
     loadItemsNature();
     loadItemsExercice();
     loadItemsPeriode();
   }, []);
 
-  useEffect(() => {
-    validate();
-  }, [item.Idexercice, item.Idperiode, item.Sens, item.Idnatureoperation]);
+  // useEffect(() => {
+  //   validate();
+  // }, [item.Idexercice, item.Idperiode, item.Sens, item.Idnatureoperation]);
 
-  //
-  const setBabalScript = (bab) => {
-    return <>{bab}</>;
-  };
   const columns = [
     {
       name: "Caisse",
@@ -156,7 +147,7 @@ export const HistoriqueOperations = ({
               columnId="Idexercice"
               columnDisplay="Code"
               value={item.Idexercice}
-              addChange={changeHandler}
+              addChange={changeHandlerExercie}
             />
             <TSelect
               label="Periode"

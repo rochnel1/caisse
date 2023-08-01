@@ -9,11 +9,9 @@ import {
   TTable,
   TValidationButton,
 } from "../../utils/__";
-import { OOperation, OOuvertureCaisse } from "../_administration_/_init_";
+import { OOperation } from "../_administration_/_init_";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
-import { RemoveCookie } from "../../utils/removeCookies";
-import { SetCookie } from "../../utils/setCookies";
 
 export const OuvertureCaisse = ({ children }) => {
   const [items, setItems] = useState([]);
@@ -95,6 +93,18 @@ export const EOuvertureCaisse = ({
     setItem({ ...item, [e.target.name]: e.target.value });
   };
 
+  const changeHandlerExercie = (e) => {
+    let temp = cPeriode;
+    temp = temp.filter(
+      (o) => o.IdexerciceNavigation.Idexercice == e.target.value
+    );
+    let Obj = item;
+    Obj[e.target.name] = e.target.value;
+    Obj["Idperiode"] = "";
+    setItem({ ...item, [e.target.name]: e.target.value, Idperiode: "" });
+    setPeriode(temp);
+  };
+
   const save = async (e) => {
     // Enregistrement de l'objet dans le localStorage
     const obj = {
@@ -115,6 +125,7 @@ export const EOuvertureCaisse = ({
   const [personne, setPersonnel] = useState([]);
   const [exercice, setExercice] = useState([]);
   const [periode, setPeriode] = useState([]);
+  const [cPeriode, setCPeriode] = useState([]);
 
   const loadItemsExercice = () => {
     api(ENDPOINTS.exercices)
@@ -125,7 +136,10 @@ export const EOuvertureCaisse = ({
   const loadItemsPeriode = () => {
     api(ENDPOINTS.periodes)
       .fetch()
-      .then((res) => setPeriode(res.data))
+      .then((res) => {
+        setCPeriode([...res.data]);
+        // console.log(res.data);
+      })
       .catch((err) => alert(err));
   };
   const loadItemsCaisse = () => {
@@ -195,7 +209,7 @@ export const EOuvertureCaisse = ({
           columnDisplay="Code"
           value={item.Idexercice}
           maxlength={60}
-          addChange={changeHandler}
+          addChange={changeHandlerExercie}
         />
         <TSelect
           label="Période"

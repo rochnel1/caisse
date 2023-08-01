@@ -20,6 +20,8 @@ export const ENDPOINTS = {
   operations: "Operations",
   operationsCtrl: "Operations/Controle",
   operationsClo: "Operations/Cloture",
+  operationsCompta: "Operations/Compta",
+  operationsComptabiliser: "Operations/Comptabiliser",
   budgets: "Budgets",
   budgetsRealisation: "Budgets/realisations",
   generalites: "Generalites",

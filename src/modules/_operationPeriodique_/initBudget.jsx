@@ -56,7 +56,7 @@ export const InitBudget = ({ children }) => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-    }, 2000);
+    }, 900);
     loadItems();
   }, [refresh]);
 
