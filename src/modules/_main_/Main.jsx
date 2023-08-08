@@ -24,12 +24,10 @@ import {
   FaUsers,
   FaWrench,
 } from "react-icons/fa";
-import { TGroupeMenu } from "../../utils/__";
+import { TGroupeMenu, TValidationButton } from "../../utils/__";
 import "react-icons/gi";
 import { GiHamburgerMenu, GiPayMoney, GiReceiveMoney } from "react-icons/gi";
-import { CiLogout } from "react-icons/ci";
 import Swal from "sweetalert2";
-import { Link } from "react-router-dom";
 
 function Main({ children }) {
   const [menu, setMenu] = useState(false);
@@ -50,18 +48,28 @@ function Main({ children }) {
       cancelButtonText: "Non",
     }).then((result) => {
       if (result.value) {
+        localStorage.removeItem("token");
         signOut();
-        <Link to="/login" />;
+        //redirection
+        window.location.href = "/login";
       }
     });
   };
+
   const signOut = () => {
     // Enregistrement de l'objet dans le localStorage
     const obj = {
       etat: "off",
     };
     localStorage.setItem("connexion", JSON.stringify(obj));
+    setLogOut(true);
   };
+
+  useEffect(() => {
+    const objString = localStorage.getItem("connexion");
+    const obj = JSON.parse(objString);
+    obj.etat == "off" ? setLogOut(true) : setLogOut(false);
+  }, []);
 
   return (
     <>
@@ -70,24 +78,19 @@ function Main({ children }) {
           <div className="title">
             <nav>
               <nav className="logo">
-                <button title="Afficher le menu" onClick={setMenuOpenClose}>
-                  <GiHamburgerMenu />
-                  Menu
-                </button>
+                {logout == false && (
+                  <button title="Afficher le menu" onClick={setMenuOpenClose}>
+                    <GiHamburgerMenu />
+                    Menu
+                  </button>
+                )}
               </nav>
             </nav>
             <nav className="logo">
-              <i>Gestion de la caisse courante</i>
+              <h3>Gestion de la caisse courante</h3>
             </nav>
             <nav>
-              <button
-                title="Se déconnecter de l'application"
-                onClick={LogOut}
-                className="buttonAll"
-              >
-                <CiLogout />
-                Se Déconnecter
-              </button>
+              {logout == false && <TValidationButton logout={LogOut} />}
             </nav>
           </div>
           {menu && (
