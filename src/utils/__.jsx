@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
+import { CiLogout } from "react-icons/ci";
+import { GiHamburgerMenu } from "react-icons/gi";
 import { useNavigate, useNavigation } from "react-router-dom";
 
 export const TInput = ({
@@ -131,6 +133,7 @@ export const TValidationButton = ({
   close,
   all,
   addLabel = "Ajouter",
+  logout,
 }) => {
   return (
     <>
@@ -148,6 +151,12 @@ export const TValidationButton = ({
         {removeAll && <button onClick={removeAll}>Supprimer Tous</button>}
         {refresh && <button onClick={refresh}>Rafraichir</button>}
         {close && <button onClick={close}>Fermer</button>}
+        {logout && (
+          <button onClick={logout}>
+            <CiLogout />
+            Se déconnecter
+          </button>
+        )}
         {children}
       </div>
     </>

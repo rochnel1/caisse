@@ -20,12 +20,16 @@ export const Generalite = ({ children }) => {
   };
 
   const save = async (e) => {
-    delete item.Idgeneralite;
-    delete item.Monnaie;
-    console.log(item);
-    await api(ENDPOINTS.generalites)
-      .post(item)
-      .then((result) => notifySuccess(result.data));
+    console.log(item.Idgeneralite);
+    if (item.Idgeneralite === undefined) {
+      delete item.Idgeneralite;
+      delete item.Monnaie;
+      await api(ENDPOINTS.generalites).post(item);
+      notifySuccess("Enregister");
+    } else {
+      await api(ENDPOINTS.generalites).put(item.Idgeneralite, item);
+      notifySuccess("Enregister");
+    }
   };
 
   useEffect(() => {

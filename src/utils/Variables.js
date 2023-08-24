@@ -10,6 +10,7 @@ export const setURL = (api) => {
 export const ENDPOINTS = {
   groupeUtilisateur: "Groupeutilisateurs",
   utilisateurs: "Utilisateurs",
+  authentification: "Utilisateurs/login",
   exercices: "Exercices",
   periodes: "Periodes",
   periodesExercice: "Periodes/exercice",

@@ -1,18 +1,12 @@
 import { useState, useEffect } from "react";
-import {
-  TFormList,
-  TFormulaire,
-  TInput,
-  TModal,
-  TTable,
-  TValidationButton,
-} from "../../utils/__";
+import { TFormulaire, TInput, TModal, TValidationButton } from "../../utils/__";
 import { OGroupeUtilisateur } from "./_init_";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Load } from "../../utils/load";
+import DataTable from "react-data-table-component";
 
 export const GroupesUtilisateurs = ({ children }) => {
   const [items, setItems] = useState([]);
@@ -42,6 +36,13 @@ export const GroupesUtilisateurs = ({ children }) => {
     setRefresh(!refresh);
   };
 
+  const [selectedRowKey, setSelectedRowKey] = useState(null);
+
+  const handleselected = ({ row }) => {
+    const itemId = row.Idgpeutilisateur;
+    console.log("ID de l'élément sélectionné :", itemId);
+  };
+
   const loadGpeUtilisateurs = () => {
     api(ENDPOINTS.groupeUtilisateur)
       .fetch()
@@ -50,13 +51,19 @@ export const GroupesUtilisateurs = ({ children }) => {
       })
       .catch((err) => notify(err));
   };
-
+  const columns = [
+    {
+      name: "Id",
+      selector: (row) => row.Idgpeutilisateur,
+    },
+    {
+      name: "Nom du groupe",
+      selector: (row) => row.Nomgroupe,
+    },
+  ];
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
     loadGpeUtilisateurs();
+    setSelectedRowKey(null);
   }, [refresh]);
 
   return (
@@ -65,19 +72,20 @@ export const GroupesUtilisateurs = ({ children }) => {
       {loading ? (
         <Load loading={loading} />
       ) : (
-        <TFormList
+        <DataTable
           title="Liste des groupes utilisateurs"
-          options={<TValidationButton add={add} refresh={rafraichir} />}
-        >
-          <TTable
-            items={items}
-            columns={[{ name: "Nomgroupe" }]}
-            columnsDisplay={["Nom du Groupe"]}
-            lineClick={(o) => {
-              modify(o.Idgpeutilisateur);
-            }}
-          ></TTable>
-        </TFormList>
+          columns={columns}
+          data={items}
+          pagination
+          fixedHeader
+          fixedHeaderScrollHeight="450px"
+          highlightOnHover
+          actions={
+            <button className="buttonAll" onClick={add}>
+              Ajouter
+            </button>
+          }
+        />
       )}
 
       {open.groupeUtilisateur && (

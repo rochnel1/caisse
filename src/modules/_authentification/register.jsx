@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { OUtilisateur } from "../_administration_/_init_";
 import { styled } from "styled-components";
-import {
-  TFormulaire,
-  TInput,
-  TSelect,
-  TValidationButton,
-} from "../../utils/__";
+import { TInput, TLayout, TSelect } from "../../utils/__";
 import { api } from "../../utils/api";
 import { ENDPOINTS } from "../../utils/Variables";
 import { Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-export const Register = ({}) => {
+export const Register = ({ children }) => {
   const [item, setItem] = useState(OUtilisateur);
+  const notify = (msg) => toast.success(msg);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,58 +39,46 @@ export const Register = ({}) => {
     }
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    api(ENDPOINTS.utilisateurs)
-      .fetch()
-      .then((response) => {
-        if (response.status === 200) {
-          // Set the user to the localStorage
-          localStorage.setItem("user", response.data);
 
-          // Redirect the user to the home page
-          window.location.href = "/";
-        } else {
-          alert("Invalid username or password");
-        }
-      })
-      .catch((err) => alert(err));
+    delete item.IdUtilisateur;
+    api(ENDPOINTS.utilisateurs).post(item);
+    notify("Enregistrement éffectué avec succès !");
+    setItem(...OUtilisateur);
   };
   return (
     <>
+      <ToastContainer />;
       <div>
-        <div className="card">
-          <div className="card-header">
-            <h1>S'inscrire</h1>
-          </div>
-          <div className="card-body">
+        <div className="page">
+          <div className="cover">
+            <h2 className="centered"> Nouvel utlisateur</h2>
             <TInput
-              type="text"
               name="Login"
               value={item.Login}
-              onChange={handleChange}
-              placeholder="Login"
+              addChange={handleChange}
+              label="Login"
             />
             <TInput
-              type="text"
               name="Nomutilisateur"
               value={item.Nomutilisateur}
-              onChange={handleChange}
-              placeholder="Nom(s)"
+              addChange={handleChange}
+              label="Nom(s)"
             />
             <TInput
-              type="text"
               name="Prenomutilisateur"
               value={item.Prenomutilisateur}
-              onChange={handleChange}
-              placeholder="Prénom(s)"
+              addChange={handleChange}
+              label="Prénom(s)"
             />
+
             <TInput
               type="password"
               name="Password"
               value={item.Password}
-              onChange={handleChange}
-              placeholder="Mot de passe"
+              addChange={handleChange}
+              label="Mot de passe"
             />
             <TSelect
               label="Groupe d'utilisateur"
@@ -103,15 +89,19 @@ export const Register = ({}) => {
               value={item.Idgpeutilisateur}
               addChange={handleChange}
             />
+
+            <br />
+            <div className="centered">
+              <button className="buttonAll" onClick={handleSubmit}>
+                Enregistrer
+              </button>
+            </div>
+            <br />
+            <br />
+            <Link to="/login" className="centered">
+              <p className="text">Vous avez déjà un compte ? </p>
+            </Link>
           </div>
-          <br />
-          <button className="buttonAll" onClick={handleSubmit}>
-            Se connecter
-          </button>
-          <br />
-          <Link to="/login" className="centered">
-            Vous avez déjà un compte ?{" "}
-          </Link>
         </div>
       </div>
     </>

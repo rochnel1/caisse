@@ -5,34 +5,45 @@
   justify-content: center;
   height: 100vh;
 }
+
+.hide {
+  position: absolute;
+  transform: scale(0);
+}
+
+.page {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background-color: #888; */
+}
+
+.text {
+  position: relative;
+  bottom: 2em;
+}
+
+.cover {
+  background-color: white;
+  width: 20em;
+  height: auto;
+  position: relative;
+  border-radius: 1em;
+  box-shadow: 0 0.118em 0.7em rgb(156, 156, 156);
+  padding-left: 30px;
+  padding-right: 30px;
+  /* display: block; */
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
 .centered {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
-.card {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background-color: #fff;
-}
-
-.card-header {
-  font-size: 18px;
-  font-weight: bold;
-  color: #ffffff;
-  background-color: purple;
-}
-
-.card-body {
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-}
-
 .buttonAll {
   background-color: purple;
   color: white;
@@ -264,6 +275,8 @@ table tbody tr:nth-child(2n) td {
 .appli-header {
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: 0;
 }
 .appli-header .title {
   display: flex;
@@ -338,6 +351,8 @@ table tbody tr:nth-child(2n) td {
   font-weight: 400;
   border-top: 1px solid lightgray;
   background-color: #eee;
+  position: sticky;
+  bottom: 0;
 }
 
 .menu .menu-group {
