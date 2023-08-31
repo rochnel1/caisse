@@ -21,7 +21,6 @@ export const Login = ({ children }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // console.log(item);
     if (item.Login == "" || item.Password == "") {
       notifyWarn("Veuillez remplir tous les champs");
     } else {
@@ -63,6 +62,7 @@ export const Login = ({ children }) => {
       "Authorization"
     ] = `Bearer ${localStorage.getItem("token")}`;
   };
+
   return (
     <>
       <ToastContainer />;
@@ -77,6 +77,7 @@ export const Login = ({ children }) => {
               addChange={handleChange}
               label="Login"
             />
+            <br />
             <TInput
               type="password"
               name="Password"

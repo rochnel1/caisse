@@ -14,6 +14,7 @@ import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
 import { jsonDateConvert } from "../../utils/utils";
 import { Load } from "../../utils/load";
+import { ToastContainer, toast } from "react-toastify";
 
 export const Exercices = ({ children }) => {
   const [items, setItems] = useState([]);
@@ -26,6 +27,8 @@ export const Exercices = ({ children }) => {
     Idexercice: 0,
     codeExercie: "",
   });
+
+  const notify = (msg) => toast.success(msg);
 
   const add = (e) => {
     setOpen({ ...open, exercice: true, Idexercice: 0 });
@@ -65,43 +68,48 @@ export const Exercices = ({ children }) => {
 
   return (
     <>
-      {loading ? (
-        <Load loading={loading} />
-      ) : (
-        <TFormList
-          title="Liste des exercices"
-          options={
-            <TValidationButton add={add} print={print} refresh={rafraichir} />
-          }
-        >
-          <TTable
-            items={items}
-            columns={[
-              { name: "Code" },
-              {
-                name: "Datedebut",
-                render: (o) => new Date(o.Datedebut).toLocaleString(),
-              },
-              {
-                name: "Datefin",
-                render: (o) => new Date(o.Datefin).toLocaleString(),
-              },
-              { name: "Statut", render: (o) => (o.Statut ? "En cours" : "") },
-              { name: "Cloture", render: (o) => (o.Cloture ? "Oui" : "Non") },
-            ]}
-            columnsDisplay={[
-              "Code",
-              "Date de Début",
-              "Date de Fin",
-              "Statut",
-              "Cloturé",
-            ]}
-            lineClick={(o) => {
-              modify(o.Idexercice, o.Code);
-            }}
-          ></TTable>
-        </TFormList>
-      )}
+      <ToastContainer
+        position="top-center"
+        autoClose={1800}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+      />
+      <TFormList
+        title="Liste des exercices"
+        options={
+          <TValidationButton add={add} print={print} refresh={rafraichir} />
+        }
+      >
+        <TTable
+          items={items}
+          columns={[
+            { name: "Code" },
+            {
+              name: "Datedebut",
+              render: (o) => new Date(o.Datedebut).toLocaleString(),
+            },
+            {
+              name: "Datefin",
+              render: (o) => new Date(o.Datefin).toLocaleString(),
+            },
+            { name: "Statut", render: (o) => (o.Statut ? "En cours" : "") },
+            { name: "Cloture", render: (o) => (o.Cloture ? "Oui" : "Non") },
+          ]}
+          columnsDisplay={[
+            "Code",
+            "Date de Début",
+            "Date de Fin",
+            "Statut",
+            "Cloturé",
+          ]}
+          lineClick={(o) => {
+            modify(o.Idexercice, o.Code);
+          }}
+        ></TTable>
+      </TFormList>
       {open.exercice && (
         <TModal>
           <EExercices
@@ -131,19 +139,26 @@ export const EExercices = ({
     setItem({ ...item, [e.target.name]: e.target.checked });
   };
 
+  const notify = (msg) => toast.success(msg);
+
   const save = async (e) => {
     console.log(item);
     try {
       if (item.Idexercice === 0) {
         //nouvel enregistrement
         delete item.Idexercice;
-        await api(ENDPOINTS.exercices).post(item);
+        await api(ENDPOINTS.exercices)
+          .post(item)
+          .then(() => notify("Exercice ajouté avec succès !"));
       } else {
         //modification
-        await api(ENDPOINTS.exercices).put(item.Idexercice, item);
+        await api(ENDPOINTS.exercices)
+          .put(item.Idexercice, item)
+          .then(() => notify("Exercice Modifié avec succès !"));
       }
     } catch (error) {
-      alert(error.message);
+      // alert();
+      notify(error.message);
     } finally {
       setItem(OExercice);
       if (addRefreshHandler) addRefreshHandler();
@@ -153,7 +168,9 @@ export const EExercices = ({
 
   const remove = async (e) => {
     if (item.Idexercice === 0) return;
-    const res = await api(ENDPOINTS.exercices).delete(item.Idexercice, item);
+    const res = await api(ENDPOINTS.exercices)
+      .delete(item.Idexercice, item)
+      .then(notify("Exercice supprimé avec succès !"));
     if (addRefreshHandler) addRefreshHandler(res);
     if (addQuiHandler) addQuiHandler();
   };
@@ -170,61 +187,63 @@ export const EExercices = ({
   }, []);
 
   return (
-    <TFormulaire
-      title="Nouvel Exercice"
-      valPanel={
-        <TValidationButton
-          add={save}
-          addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
-          cancel={addQuiHandler}
-          remove={(e) => (item.Idexercice !== 0 ? remove() : undefined)}
-        />
-      }
-    >
-      <TInput
-        label="Code"
-        name="Code"
-        value={item.Code}
-        maxlength={60}
-        addChange={changeHandler}
-      />
-      <TLayout cols="1fr 1fr">
+    <>
+      <TFormulaire
+        title="Nouvel Exercice"
+        valPanel={
+          <TValidationButton
+            add={save}
+            addLabel={itemId == 0 ? "Ajouter" : "Modifier"}
+            cancel={addQuiHandler}
+            remove={(e) => (item.Idexercice !== 0 ? remove() : undefined)}
+          />
+        }
+      >
         <TInput
-          type="date"
-          label="Date de début"
-          name="Datedebut"
-          value={jsonDateConvert(item.Datedebut)}
+          label="Code"
+          name="Code"
+          value={item.Code}
           maxlength={60}
           addChange={changeHandler}
         />
-        <TInput
-          type="date"
-          label="Date de fin"
-          name="Datefin"
-          value={jsonDateConvert(item.Datefin)}
-          maxlength={60}
-          addChange={changeHandler}
-        />
-      </TLayout>
+        <TLayout cols="1fr 1fr">
+          <TInput
+            type="date"
+            label="Date de début"
+            name="Datedebut"
+            value={jsonDateConvert(item.Datedebut)}
+            maxlength={60}
+            addChange={changeHandler}
+          />
+          <TInput
+            type="date"
+            label="Date de fin"
+            name="Datefin"
+            value={jsonDateConvert(item.Datefin)}
+            maxlength={60}
+            addChange={changeHandler}
+          />
+        </TLayout>
 
-      <TInput
-        label="En cours"
-        type="checkbox"
-        name="Statut"
-        value={item.Statut}
-        maxlength={60}
-        addChange={changeCheckboxHandler}
-      />
-      <TInput
-        label="Clôturer l'exercice"
-        type="checkbox"
-        name="Cloture"
-        value={item.Cloture}
-        maxlength={60}
-        addChange={changeCheckboxHandler}
-      />
-      {children}
-    </TFormulaire>
+        <TInput
+          label="En cours"
+          type="checkbox"
+          name="Statut"
+          value={item.Statut}
+          maxlength={60}
+          addChange={changeCheckboxHandler}
+        />
+        <TInput
+          label="Clôturer l'exercice"
+          type="checkbox"
+          name="Cloture"
+          value={item.Cloture}
+          maxlength={60}
+          addChange={changeCheckboxHandler}
+        />
+        {children}
+      </TFormulaire>
+    </>
   );
 };
 
@@ -273,6 +292,15 @@ export const Periodes = ({ children, id, titre }) => {
   };
   return (
     <>
+      <ToastContainer
+        position="top-center"
+        autoClose={2000}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+      />
       <TFormList
         title={"Liste des périodes : " + titre}
         options={<TValidationButton add={add} refresh={rafraichir} />}
@@ -327,20 +355,24 @@ export const EPeriodes = ({
   exerciceId = 0,
 }) => {
   const [item, setItem] = useState(OPeriode);
+  const notify = (msg) => toast.success(msg);
 
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
-  console.log(item);
 
   const save = async (e) => {
     if (item.Idperiode === 0) {
       //nouvel enregistrement
       delete item.Idperiode;
-      await api(ENDPOINTS.periodes).post(item);
+      await api(ENDPOINTS.periodes)
+        .post(item)
+        .then(() => notify("Période ajouté correctement !"));
     } else {
       //modification
-      await api(ENDPOINTS.periodes).put(item.Idperiode, item);
+      await api(ENDPOINTS.periodes)
+        .put(item.Idperiode, item)
+        .then(() => notify("Période modifié correctement !"));
     }
     setItem({ ...OPeriode });
     if (addRefreshHandler) addRefreshHandler();
@@ -349,7 +381,9 @@ export const EPeriodes = ({
 
   const remove = async (e) => {
     if (item.Idperiode === 0) return;
-    const res = await api(ENDPOINTS.periodes).delete(item.Idperiode, item);
+    const res = await api(ENDPOINTS.periodes)
+      .delete(item.Idperiode, item)
+      .then(notify("Période supprimé avec succès !"));
     if (addRefreshHandler) addRefreshHandler(res);
     if (addQuiHandler) addQuiHandler();
   };

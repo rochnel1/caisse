@@ -1,11 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { OComptabilisation, OOperation } from "../_administration_/_init_";
-import {
-  TFormulaire,
-  TModal,
-  TValidationButton,
-  TFormList,
-} from "../../utils/__";
 import { api } from "../../utils/api";
 import { ENDPOINTS } from "../../utils/Variables";
 import { ToastContainer, toast } from "react-toastify";
@@ -109,6 +102,17 @@ export const Comptabilisation = ({ children }) => {
     }).format(value);
   };
 
+  const imprimer = () => {
+    try {
+      // preval`
+      //   const fs = require("fs");
+      //   fs.writeFile('${process.env.HOME}/Desktop/myfile.txt', "text", "w");
+      // `;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     loadItems();
   }, []);
@@ -158,12 +162,22 @@ export const Comptabilisation = ({ children }) => {
         data={items}
         pagination
         fixedHeader
-        fixedHeaderScrollHeight="450px"
         highlightOnHover
         actions={
-          <button className="buttonAll" onClick={add}>
-            Comptabilser
-          </button>
+          <div>
+            <button
+              className="buttonAll"
+              style={{
+                marginRight: "10px",
+              }}
+              onClick={add}
+            >
+              Comptabiliser
+            </button>
+            <button className="buttonAll" onClick={imprimer}>
+              Imprimer
+            </button>
+          </div>
         }
       />
     </>

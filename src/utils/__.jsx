@@ -151,12 +151,7 @@ export const TValidationButton = ({
         {removeAll && <button onClick={removeAll}>Supprimer Tous</button>}
         {refresh && <button onClick={refresh}>Rafraichir</button>}
         {close && <button onClick={close}>Fermer</button>}
-        {logout && (
-          <button onClick={logout}>
-            <CiLogout />
-            Se déconnecter
-          </button>
-        )}
+        {logout && <button onClick={logout}>Se déconnecter</button>}
         {children}
       </div>
     </>
@@ -345,5 +340,35 @@ export const TDataTable = ({ columns, data }) => {
     <>
       <DataTable columns={columns} data={data} pagination />
     </>
+  );
+};
+
+export const TModalv2 = ({ children, show = false }) => {
+  const [active, setActive] = useState(show);
+  const handleActive = (e) => {
+    e.preventDefault();
+    setActive(false);
+  };
+  return (
+    <>
+      <div
+        className="modal-v2"
+        onClick={handleActive}
+        style={{ display: active ? "flex" : "none" }}
+      >
+        <div className="modal-v2-wrapper"></div>
+        <div className="modal-v2-content">{children}</div>
+      </div>
+    </>
+  );
+};
+
+export const Card = ({ title, image, description }) => {
+  return (
+    <div className="card">
+      <img src={image} alt={title} />
+      <h1>{title}</h1>
+      <p>{description}</p>
+    </div>
   );
 };

@@ -60,19 +60,21 @@ export const Register = ({ children }) => {
               addChange={handleChange}
               label="Login"
             />
+            <br />
             <TInput
               name="Nomutilisateur"
               value={item.Nomutilisateur}
               addChange={handleChange}
               label="Nom(s)"
             />
+            <br />
             <TInput
               name="Prenomutilisateur"
               value={item.Prenomutilisateur}
               addChange={handleChange}
               label="Prénom(s)"
             />
-
+            <br />
             <TInput
               type="password"
               name="Password"
@@ -80,6 +82,7 @@ export const Register = ({ children }) => {
               addChange={handleChange}
               label="Mot de passe"
             />
+            <br />
             <TSelect
               label="Groupe d'utilisateur"
               name="Idgpeutilisateur"
@@ -89,7 +92,6 @@ export const Register = ({ children }) => {
               value={item.Idgpeutilisateur}
               addChange={handleChange}
             />
-
             <br />
             <div className="centered">
               <button className="buttonAll" onClick={handleSubmit}>

@@ -22,24 +22,18 @@ import { PlanComptable } from "./modules/_administration_/planComptable";
 import { HistoriqueOperations } from "./modules/_etats_/historiqueOperations";
 import { Login } from "./modules/_authentification/login";
 import { Register } from "./modules/_authentification/register";
-import { useEffect, useState } from "react";
+import { Home } from "./modules/_main_/home";
 
 function App() {
-  const [state, setState] = useState(false);
-
-  useEffect(() => {
-    const objString = localStorage.getItem("connection");
-    const obj = JSON.parse(objString);
-    obj == null || obj.etat !== "off" ? setState(true) : setState(false);
-  });
   return (
     <BrowserRouter>
       <Main>
         <Routes>
           {/* Route pour la partie administration */}
-          <Route exact path="/" element={<Utilisateurs />} />
+          <Route exact path="/" element={<Home />} />
           <Route exact path="*" element={<NotFound />} />
           <Route exact path="/groupe_users" element={<GroupesUtilisateurs />} />
+          <Route exact path="/users" element={<Utilisateurs />} />
           <Route exact path="/caisses" element={<Caisses />} />
           <Route exact path="/exercices" element={<Exercices />} />
           <Route exact path="/generalites" element={<Generalite />} />

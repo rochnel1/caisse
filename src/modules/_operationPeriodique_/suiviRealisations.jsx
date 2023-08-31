@@ -16,7 +16,10 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
   const [item, setItem] = useState(OInitBudget);
 
   const changeHandler = (e) => {
+    let temp = item;
+    temp[e.target.name] = e.target.value;
     setItem({ ...item, [e.target.name]: e.target.value });
+    validate(temp);
   };
 
   const loadItems = () => {
@@ -27,10 +30,6 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
   };
 
   const loadItemsFliter = (idExo, idPer, idNat) => {
-    if (idExo == 0 || idPer == 0 || idNat == 0) {
-      setItems([]);
-      return;
-    }
     api(ENDPOINTS.budgetsRealisation)
       .fetchByIds(idExo, idPer, idNat)
       .then((res) => setItems(res.data))
@@ -38,9 +37,13 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
   };
 
   const validate = async (e) => {
-    idExo = item.Idexercice;
-    idPer = item.Idperiode;
-    idNat = item.Idnatureoperation;
+    // idExo = item.Idexercice;
+    // idPer = item.Idperiode;
+    // idNat = item.Idnatureoperation;
+    idExo = e.Idexercice == "" ? 0 : e.Idexercice;
+    idPer = e.Idperiode == "" ? 0 : e.Idperiode;
+    idNat = e.Idnatureoperation == "" ? 0 : e.Idnatureoperation;
+
     loadItemsFliter(idExo, idPer, idNat);
   };
 
@@ -54,6 +57,7 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
   const [exercice, setExercice] = useState([]);
   const [nature, setNature] = useState([]);
   const [periode, setPeriode] = useState([]);
+
   const changeHandlerExercie = (e) => {
     let temp = cPeriode;
     temp = temp.filter(
@@ -62,6 +66,7 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
     let Obj = item;
     Obj[e.target.name] = e.target.value;
     Obj["Idperiode"] = "";
+    validate(Obj);
     setItem({ ...item, [e.target.name]: e.target.value, Idperiode: "" });
     setPeriode(temp);
   };
@@ -90,7 +95,7 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
   };
 
   useEffect(() => {
-    loadItems();
+    // loadItems();s
     loadItemsNature();
     loadItemsExercice();
     loadItemsPeriode();
@@ -170,7 +175,6 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
             data={items}
             pagination
             fixedHeader
-            fixedHeaderScrollHeight="450px"
             highlightOnHover
             actions={
               <button className="buttonAll" onClick={print}>

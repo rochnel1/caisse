@@ -112,6 +112,7 @@ export const OperationCaisse = ({ children, sens = 0 }) => {
             name="Montant"
             value={item.Montant}
             maxlength={60}
+            type="number"
             addChange={changeHandler}
           />
           <TInput
@@ -126,7 +127,7 @@ export const OperationCaisse = ({ children, sens = 0 }) => {
       </TFormulaire>
 
       <ToastContainer
-        autoClose={1200}
+        autoClose={1800}
         position="top-center"
         newestOnTop={false}
         closeOnClick

@@ -81,7 +81,7 @@ export const Personnel = ({ children }) => {
               "Nom(s)",
               "Prénom(s)",
               "Profil(s)",
-              "caisse associée",
+              "Caisse associée",
             ]}
             lineClick={(o) => {
               modify(o.Idpersonnel);
@@ -226,8 +226,9 @@ export const EPersonnel = ({
           maxlength={60}
           addChange={changeHandler}
         />
+
         <TSelect
-          label="Caisse associée"
+          label="Caisse Associée"
           name="Idcaisse"
           items={caisse}
           columnId="Idcaisse"

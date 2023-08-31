@@ -53,10 +53,7 @@ export const InitBudget = ({ children }) => {
   };
 
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 900);
+    setLoading(false);
     loadItems();
   }, [refresh]);
 
@@ -67,60 +64,65 @@ export const InitBudget = ({ children }) => {
 
   return (
     <>
-      {loading ? (
-        <Load loading={loading} />
-      ) : (
-        <TFormList
-          title="Liste des budgets"
-          options={
-            <TValidationButton add={add} print={print} refresh={rafraichir} />
-          }
-        >
-          <TTable
-            items={items}
-            columns={[
-              {
-                name: "",
-                render: (o) => setBabalScript(o.IdexerciceNavigation?.Code),
-              },
-              {
-                name: "",
-                render: (o) =>
-                  setBabalScript(o.IdperiodeNavigation?.Codeperiode),
-              },
-              {
-                name: "",
-                render: (o) =>
-                  new Date(o.IdperiodeNavigation?.Datedebut).toLocaleString(),
-              },
-              {
-                name: "",
-                render: (o) =>
-                  new Date(o.IdperiodeNavigation?.Datefin).toLocaleString(),
-              },
-              {
-                name: "",
-                render: (o) =>
-                  setBabalScript(o.IdnatureoperationNavigation?.Codenature),
-              },
-              { name: "Montantbudget" },
-              { name: "Sensbudget" },
-            ]}
-            columnsDisplay={[
-              "Exercice",
-              "Période",
-              "Date de Début",
-              "Date de Fin",
-              "Nature d'opération",
-              "Montant( prévision )",
-              "Sens",
-            ]}
-            lineClick={(o) => {
-              modify(o.Idbudget);
-            }}
-          ></TTable>
-        </TFormList>
-      )}
+      <ToastContainer
+        position="top-center"
+        autoClose={1800}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+      />
+
+      <TFormList
+        title="Liste des budgets"
+        options={
+          <TValidationButton add={add} print={print} refresh={rafraichir} />
+        }
+      >
+        <TTable
+          items={items}
+          columns={[
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdexerciceNavigation?.Code),
+            },
+            {
+              name: "",
+              render: (o) => setBabalScript(o.IdperiodeNavigation?.Codeperiode),
+            },
+            {
+              name: "",
+              render: (o) =>
+                new Date(o.IdperiodeNavigation?.Datedebut).toLocaleString(),
+            },
+            {
+              name: "",
+              render: (o) =>
+                new Date(o.IdperiodeNavigation?.Datefin).toLocaleString(),
+            },
+            {
+              name: "",
+              render: (o) =>
+                setBabalScript(o.IdnatureoperationNavigation?.Codenature),
+            },
+            { name: "Montantbudget" },
+            { name: "Sensbudget" },
+          ]}
+          columnsDisplay={[
+            "Exercice",
+            "Période",
+            "Date de Début",
+            "Date de Fin",
+            "Nature d'opération",
+            "Montant( prévision )",
+            "Sens",
+          ]}
+          lineClick={(o) => {
+            modify(o.Idbudget);
+          }}
+        ></TTable>
+      </TFormList>
       {open.initbudget && (
         <TModal>
           <EInitBudget
@@ -141,11 +143,11 @@ export const EInitBudget = ({
   addRefreshHandler,
 }) => {
   const [item, setItem] = useState(OInitBudget);
-  const notify = (msg) => toast.success(msg);
-
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
+
+  const notify = (msg) => toast.success(msg);
 
   const save = async (e) => {
     item.Sensbudget === 0
@@ -155,7 +157,9 @@ export const EInitBudget = ({
     if (item.Idbudget === 0) {
       //nouvel enregistrement
       delete item.Idbudget;
-      await api(ENDPOINTS.budgets).post(item);
+      await api(ENDPOINTS.budgets)
+        .post(item)
+        .then((result) => notify("Budget ajouté correctement !"));
     } else {
       //modification
       await api(ENDPOINTS.budgets).put(item.Idbudget, item);
@@ -163,19 +167,32 @@ export const EInitBudget = ({
     setItem({ ...OInitBudget });
     if (addRefreshHandler) addRefreshHandler();
     if (addQuiHandler) addQuiHandler();
-    notify("Budget ajoutée avec succès");
   };
 
   const remove = async (e) => {
     if (item.Idbudget === 0) return;
-    const res = await api(ENDPOINTS.budgets).delete(item.Idbudget, item);
+    const res = await api(ENDPOINTS.budgets)
+      .delete(item.Idbudget, item)
+      .then((result) => notify("Budget supprimé avec succès !"));
     if (addRefreshHandler) addRefreshHandler(res);
     if (addQuiHandler) addQuiHandler();
   };
 
+  const changeHandlerExercie = (e) => {
+    let temp = cPeriode;
+    temp = temp.filter(
+      (o) => o.IdexerciceNavigation.Idexercice == e.target.value
+    );
+    let Obj = item;
+    Obj[e.target.name] = e.target.value;
+    Obj["Idperiode"] = "";
+    setItem({ ...item, [e.target.name]: e.target.value, Idperiode: "" });
+    setPeriode(temp);
+  };
   const [exercice, setExercice] = useState([]);
   const [nature, setNature] = useState([]);
   const [periode, setPeriode] = useState([]);
+  const [cPeriode, setCPeriode] = useState([]);
 
   const loadItemsExercice = () => {
     api(ENDPOINTS.exercices)
@@ -187,7 +204,7 @@ export const EInitBudget = ({
   const loadItemsPeriode = () => {
     api(ENDPOINTS.periodes)
       .fetch()
-      .then((res) => setPeriode(res.data))
+      .then((res) => setCPeriode(res.data))
       .catch((err) => alert(err));
   };
 
@@ -214,14 +231,14 @@ export const EInitBudget = ({
   return (
     <>
       <ToastContainer
+        autoClose={1800}
         position="top-center"
-        autoClose={false}
         newestOnTop={false}
         closeOnClick
         rtl={false}
         pauseOnFocusLoss
         draggable
-        theme="dark"
+        pauseOnHover
       />
       <TFormulaire
         title="Nouveau budget"
@@ -243,7 +260,7 @@ export const EInitBudget = ({
             columnDisplay="Code"
             value={item.Idexercice}
             maxlength={60}
-            addChange={changeHandler}
+            addChange={changeHandlerExercie}
           />
           <TSelect
             label="Période"
@@ -268,6 +285,7 @@ export const EInitBudget = ({
         />
         <TLayout cols="1fr 1fr">
           <TInput
+            type="number"
             label="Montant"
             name="Montantbudget"
             value={item.Montantbudget}
