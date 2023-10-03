@@ -12,6 +12,7 @@ import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
 import DataTable from "react-data-table-component";
 import { ToastContainer, toast } from "react-toastify";
+import { imprimer, telechargerExcelFile } from "../../utils/utils";
 
 export const ControleCaisse = ({ children, idPer, idCaiss }) => {
   const [items, setItems] = useState([]);
@@ -112,7 +113,7 @@ export const ControleCaisse = ({ children, idPer, idCaiss }) => {
       selector: (row) => new Date(row.date).toLocaleString(),
     },
     {
-      name: "Montant de l'opération",
+      name: "Montant de l'opération (FCFA)",
       selector: (row) => row.montant,
     },
     {
@@ -139,7 +140,7 @@ export const ControleCaisse = ({ children, idPer, idCaiss }) => {
     <>
       <ToastContainer
         position="top-center"
-        autoClose={false}
+        autoClose={2000}
         newestOnTop={false}
         closeOnClick
         rtl={false}
@@ -170,7 +171,7 @@ export const ControleCaisse = ({ children, idPer, idCaiss }) => {
         </TLayout>
         <div>
           <DataTable
-            title={`Montant des opérations : ${
+            title={`Montant de la caisse : ${
               formatCurrency(montantTotal) || 0
             }`}
             columns={columns}
@@ -180,9 +181,31 @@ export const ControleCaisse = ({ children, idPer, idCaiss }) => {
             fixedHeaderScrollHeight="450px"
             highlightOnHover
             actions={
-              <button className="buttonAll" onClick={control}>
-                Faire le contrôle
-              </button>
+              <>
+                <button className="buttonAll" onClick={(e) => control(e)}>
+                  Contrôler
+                </button>{" "}
+                <button
+                  className="buttonAll"
+                  style={{
+                    marginRight: "10px",
+                  }}
+                  onClick={(e) =>
+                    imprimer(items, columns, "Liste des opérations à contrôler")
+                  }
+                >
+                  Imprimer
+                </button>
+                <button
+                  className="buttonAll"
+                  onClick={(e) => telechargerExcelFile(items, columns)}
+                  style={{
+                    marginRight: "10px",
+                  }}
+                >
+                  Export Excel
+                </button>
+              </>
             }
           />
         </div>

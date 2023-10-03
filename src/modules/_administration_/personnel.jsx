@@ -181,7 +181,9 @@ export const EPersonnel = ({
         theme="dark"
       />
       <TFormulaire
-        title="Nouveau personnel"
+        title={
+          itemId == 0 ? "Nouveau personnel" : "Information sur le personnel"
+        }
         valPanel={
           <TValidationButton
             add={save}

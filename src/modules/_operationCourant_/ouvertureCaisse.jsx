@@ -57,7 +57,7 @@ export const OuvertureCaisse = ({ children }) => {
     <>
       <TFormList
         title="Ouverture de Caisses"
-        options={<TValidationButton add={add} print={print} />}
+        options={<TValidationButton ouvrir={add} print={print} />}
       ></TFormList>
       {open.ouvertureCaisse && (
         <TModal>

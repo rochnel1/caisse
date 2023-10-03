@@ -12,7 +12,7 @@ import {
 } from "../../utils/__";
 import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
-import { jsonDateConvert } from "../../utils/utils";
+import { jsonDateConvert, notifyError, notifySuccess } from "../../utils/utils";
 import { Load } from "../../utils/load";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -27,8 +27,6 @@ export const Exercices = ({ children }) => {
     Idexercice: 0,
     codeExercie: "",
   });
-
-  const notify = (msg) => toast.success(msg);
 
   const add = (e) => {
     setOpen({ ...open, exercice: true, Idexercice: 0 });
@@ -70,7 +68,7 @@ export const Exercices = ({ children }) => {
     <>
       <ToastContainer
         position="top-center"
-        autoClose={1800}
+        autoClose={2000}
         newestOnTop={false}
         closeOnClick
         rtl={false}
@@ -139,26 +137,23 @@ export const EExercices = ({
     setItem({ ...item, [e.target.name]: e.target.checked });
   };
 
-  const notify = (msg) => toast.success(msg);
-
   const save = async (e) => {
-    console.log(item);
     try {
       if (item.Idexercice === 0) {
         //nouvel enregistrement
         delete item.Idexercice;
         await api(ENDPOINTS.exercices)
           .post(item)
-          .then(() => notify("Exercice ajouté avec succès !"));
+          .then(() => notifySuccess("Exercice ajouté avec succès !"));
       } else {
         //modification
         await api(ENDPOINTS.exercices)
           .put(item.Idexercice, item)
-          .then(() => notify("Exercice Modifié avec succès !"));
+          .then(() => notifySuccess("Exercice Modifié avec succès !"));
       }
     } catch (error) {
       // alert();
-      notify(error.message);
+      notifyError(error.message);
     } finally {
       setItem(OExercice);
       if (addRefreshHandler) addRefreshHandler();
@@ -170,13 +165,12 @@ export const EExercices = ({
     if (item.Idexercice === 0) return;
     const res = await api(ENDPOINTS.exercices)
       .delete(item.Idexercice, item)
-      .then(notify("Exercice supprimé avec succès !"));
+      .then(notifySuccess("Exercice supprimé avec succès !"));
     if (addRefreshHandler) addRefreshHandler(res);
     if (addQuiHandler) addQuiHandler();
   };
 
   useEffect(() => {
-    // console.log("Code With Rochnel");
     setItem({ ...OExercice });
     if (itemId !== 0) {
       api(ENDPOINTS.exercices)
@@ -189,7 +183,7 @@ export const EExercices = ({
   return (
     <>
       <TFormulaire
-        title="Nouvel Exercice"
+        title={itemId == 0 ? "Nouvel Exercice" : "Information sur l'exercice"}
         valPanel={
           <TValidationButton
             add={save}
@@ -355,7 +349,6 @@ export const EPeriodes = ({
   exerciceId = 0,
 }) => {
   const [item, setItem] = useState(OPeriode);
-  const notify = (msg) => toast.success(msg);
 
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
@@ -367,12 +360,12 @@ export const EPeriodes = ({
       delete item.Idperiode;
       await api(ENDPOINTS.periodes)
         .post(item)
-        .then(() => notify("Période ajouté correctement !"));
+        .then(() => notifySuccess("Période ajouté correctement !"));
     } else {
       //modification
       await api(ENDPOINTS.periodes)
         .put(item.Idperiode, item)
-        .then(() => notify("Période modifié correctement !"));
+        .then(() => notifySuccess("Période modifié correctement !"));
     }
     setItem({ ...OPeriode });
     if (addRefreshHandler) addRefreshHandler();
@@ -383,7 +376,7 @@ export const EPeriodes = ({
     if (item.Idperiode === 0) return;
     const res = await api(ENDPOINTS.periodes)
       .delete(item.Idperiode, item)
-      .then(notify("Période supprimé avec succès !"));
+      .then(notifySuccess("Période supprimé avec succès !"));
     if (addRefreshHandler) addRefreshHandler(res);
     if (addQuiHandler) addQuiHandler();
   };
@@ -416,7 +409,7 @@ export const EPeriodes = ({
 
   return (
     <TFormulaire
-      title="Nouvelle période"
+      title={itemId == 0 ? "Nouvelle période" : "Information sur la période"}
       valPanel={
         <TValidationButton
           add={save}

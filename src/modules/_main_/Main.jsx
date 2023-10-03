@@ -68,11 +68,11 @@ function Main({ children }) {
   };
 
   useEffect(() => {
-    const objString = localStorage.getItem("connexion");
-    const obj = JSON.parse(objString);
-    if (obj.etat == "off") {
-      setLogOut(true);
-    }
+    // const objString = localStorage.getItem("connexion");
+    // const obj = JSON.parse(objString);
+    // if (obj.etat == "off") {
+    //   setLogOut(true);
+    // }
   }, []);
 
   const menuHandler = (e) => {

@@ -4,6 +4,7 @@ import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
 import { OOperation } from "../_administration_/_init_";
 import DataTable from "react-data-table-component";
+import { imprimer, telechargerExcelFile } from "../../utils/utils";
 
 export const HistoriqueOperations = ({
   children,
@@ -50,7 +51,7 @@ export const HistoriqueOperations = ({
     loadItemsFilter(idExo, idPer, idNat, sens);
   };
 
-  const print = (e) => {};
+  // const print = (e) => {};
 
   const [exercice, setExercice] = useState([]);
   const [nature, setNature] = useState([]);
@@ -83,7 +84,6 @@ export const HistoriqueOperations = ({
   };
 
   useEffect(() => {
-    // loadItems();
     loadItemsNature();
     loadItemsExercice();
     loadItemsPeriode();
@@ -104,7 +104,7 @@ export const HistoriqueOperations = ({
     },
     {
       name: "Date de l'opération",
-      selector: (row) => row.date,
+      selector: (row) => new Date(row.date).toLocaleString(),
     },
     {
       name: "Description de l'opération",
@@ -188,11 +188,30 @@ export const HistoriqueOperations = ({
         data={items}
         pagination
         fixedHeader
-        fixedHeaderScrollHeight="450px"
+        fixedHeaderScrollHeight="300px"
         actions={
-          <button className="buttonAll" onClick={print}>
-            Imprimer
-          </button>
+          <>
+            <button
+              className="buttonAll"
+              style={{
+                marginRight: "10px",
+              }}
+              onClick={(e) => imprimer(items, columns, "Liste des opérations")}
+            >
+              Imprimer
+            </button>
+            <button
+              className="buttonAll"
+              onClick={(e) =>
+                telechargerExcelFile(items, columns, "Liste des opérations")
+              }
+              style={{
+                marginRight: "10px",
+              }}
+            >
+              Export Excel
+            </button>
+          </>
         }
         highlightOnHover
         pointerOnHover

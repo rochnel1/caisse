@@ -140,7 +140,9 @@ export const EPlanComptable = ({
 
   return (
     <TFormulaire
-      title="Nouveau compte général"
+      title={
+        itemId == 0 ? "Nouveau compte général" : "Information sur le compte"
+      }
       valPanel={
         <TValidationButton
           add={save}

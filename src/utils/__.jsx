@@ -120,6 +120,7 @@ export const TSelect = ({
 
 export const TValidationButton = ({
   children,
+  ouvrir,
   add,
   modify,
   print,
@@ -140,6 +141,7 @@ export const TValidationButton = ({
       <div className="btn-validation">
         {}
         {add && <button onClick={add}>{addLabel}</button>}
+        {ouvrir && <button onClick={ouvrir}>Ouvrir une caisse</button>}
         {all && <button onClick={all}>Tous</button>}
         {save && <button onClick={save}>Enregistrer</button>}
         {control && <button onClick={control}>Faire le contrôle</button>}

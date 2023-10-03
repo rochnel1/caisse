@@ -163,7 +163,7 @@ export const ECaisse = ({
 
   return (
     <TFormulaire
-      title="Nouvelle Caisse"
+      title={itemId == 0 ? "Nouvelle Caisse" : "Information sur la caisse"}
       valPanel={
         <TValidationButton
           add={save}

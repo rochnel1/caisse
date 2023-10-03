@@ -14,6 +14,11 @@ import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
 import { OOperation } from "../_administration_/_init_";
 import { ToastContainer, toast } from "react-toastify";
+import {
+  formatCurrency,
+  imprimer,
+  telechargerExcelFile,
+} from "../../utils/utils";
 
 export const ClotureCaisse = ({ children, idPer, idCaiss }) => {
   const [items, setItems] = useState([]);
@@ -63,13 +68,6 @@ export const ClotureCaisse = ({ children, idPer, idCaiss }) => {
         console.log(sum);
       })
       .catch((err) => alert(err));
-  };
-
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("fr-CM", {
-      style: "currency",
-      currency: "XAF",
-    }).format(value);
   };
 
   const columns = [
@@ -175,9 +173,31 @@ export const ClotureCaisse = ({ children, idPer, idCaiss }) => {
             fixedHeaderScrollHeight="450px"
             highlightOnHover
             actions={
-              <button className="buttonAll" onClick={cloturer}>
-                Clôturer
-              </button>
+              <>
+                <button className="buttonAll" onClick={(e) => cloturer(e)}>
+                  Clôturer
+                </button>
+                <button
+                  className="buttonAll"
+                  style={{
+                    marginRight: "10px",
+                  }}
+                  onClick={(e) =>
+                    imprimer(items, columns, "Liste des opérations à cloturer")
+                  }
+                >
+                  Imprimer
+                </button>
+                <button
+                  className="buttonAll"
+                  onClick={(e) => telechargerExcelFile(items, columns)}
+                  style={{
+                    marginRight: "10px",
+                  }}
+                >
+                  Export Excel
+                </button>
+              </>
             }
           />
         </div>

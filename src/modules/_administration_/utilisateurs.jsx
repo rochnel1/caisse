@@ -14,6 +14,8 @@ import { ENDPOINTS } from "../../utils/Variables";
 import { api } from "../../utils/api";
 import { ToastContainer, toast } from "react-toastify";
 import { Load } from "../../utils/load";
+import { CSmartTable } from "@coreui/react-pro";
+import { setBabalScript } from "../../utils/utils";
 
 export const Utilisateurs = ({ children }) => {
   const [items, setItems] = useState([]);
@@ -38,9 +40,13 @@ export const Utilisateurs = ({ children }) => {
   };
 
   const loadItems = () => {
+    setLoading(true);
     api(ENDPOINTS.utilisateurs)
       .fetch()
-      .then((res) => setItems(res.data))
+      .then((res) => {
+        setItems(res.data);
+        setLoading(false);
+      })
       .catch((err) => notify());
   };
 
@@ -51,11 +57,6 @@ export const Utilisateurs = ({ children }) => {
     }, 1000);
     loadItems();
   }, [refresh]);
-
-  //
-  const setBabalScript = (bab) => {
-    return <>{bab}</>;
-  };
 
   return (
     <>
@@ -68,33 +69,30 @@ export const Utilisateurs = ({ children }) => {
         pauseOnFocusLoss
         draggable
       />
-      {loading ? (
-        <Load loading={loading} />
-      ) : (
-        <TFormList
-          title="Liste des utilisateurs"
-          options={<TValidationButton add={add} refresh={rafraichir} />}
-        >
-          <TTable
-            items={items}
-            columns={[
-              { name: "Login" },
-              { name: "Nomutilisateur" },
-              { name: "Prenomutilisateur" },
-              {
-                name: "",
-                render: (o) =>
-                  setBabalScript(o.IdgpeutilisateurNavigation?.Nomgroupe),
-              },
-            ]}
-            columnsDisplay={["Login", "Nom", "Prénom", "Groupe utilisateur"]}
-            columnsWidth={["auto", "auto", "auto", "120px"]}
-            lineClick={(o) => {
-              modify(o.IdUtilisateur);
-            }}
-          ></TTable>
-        </TFormList>
-      )}
+      <TFormList
+        title="Liste des utilisateurs"
+        options={<TValidationButton add={add} refresh={rafraichir} />}
+      >
+        <TTable
+          items={items}
+          columns={[
+            { name: "Login" },
+            { name: "Nomutilisateur" },
+            { name: "Prenomutilisateur" },
+            {
+              name: "",
+              render: (o) =>
+                setBabalScript(o.IdgpeutilisateurNavigation?.Nomgroupe),
+            },
+          ]}
+          columnsDisplay={["Login", "Nom", "Prénom", "Groupe utilisateur"]}
+          columnsWidth={["auto", "auto", "auto", "120px"]}
+          lineClick={(o) => {
+            modify(o.IdUtilisateur);
+          }}
+        ></TTable>
+      </TFormList>
+
       {open.utilisateur && (
         <TModal>
           <EUtilisateur
@@ -175,7 +173,9 @@ export const EUtilisateur = ({
   return (
     <>
       <TFormulaire
-        title="Nouvel Utilisateur"
+        title={
+          itemId == 0 ? "Nouvel Utilisateur" : "Information sur l'utilisateur"
+        }
         valPanel={
           <TValidationButton
             add={save}

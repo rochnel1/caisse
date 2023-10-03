@@ -38,11 +38,6 @@ export const GroupesUtilisateurs = ({ children }) => {
 
   const [selectedRowKey, setSelectedRowKey] = useState(null);
 
-  const handleselected = ({ row }) => {
-    const itemId = row.Idgpeutilisateur;
-    console.log("ID de l'élément sélectionné :", itemId);
-  };
-
   const loadGpeUtilisateurs = () => {
     api(ENDPOINTS.groupeUtilisateur)
       .fetch()
@@ -154,7 +149,11 @@ export const EGroupeUtilisateur = ({
 
   return (
     <TFormulaire
-      title="Nouveau Groupe d'utlisateur"
+      title={
+        itemId == 0
+          ? "Nouveau Groupe d'utlisateur"
+          : "Information sur le groupe"
+      }
       valPanel={
         <TValidationButton
           add={save}

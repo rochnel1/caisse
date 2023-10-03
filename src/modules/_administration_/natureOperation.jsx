@@ -124,6 +124,7 @@ export const ENatureOperation = ({
   const changeHandler = (e) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
+
   const save = async (e) => {
     if (item.Idnatureoperation === 0) {
       delete item.Idnatureoperation;
@@ -175,7 +176,11 @@ export const ENatureOperation = ({
 
   return (
     <TFormulaire
-      title="Nouvelle nature d'opération"
+      title={
+        itemId == 0
+          ? "Nouvelle nature d'opération"
+          : "Information sur la nature d'opération"
+      }
       valPanel={
         <TValidationButton
           add={save}

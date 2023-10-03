@@ -10,6 +10,11 @@ import { OInitBudget } from "../_administration_/_init_";
 import { api } from "../../utils/api";
 import { ENDPOINTS } from "../../utils/Variables";
 import DataTable from "react-data-table-component";
+import {
+  imprimer,
+  telechargerExcelFile,
+  telechargerSage,
+} from "../../utils/utils";
 
 export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
   const [items, setItems] = useState([]);
@@ -95,7 +100,6 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
   };
 
   useEffect(() => {
-    // loadItems();s
     loadItemsNature();
     loadItemsExercice();
     loadItemsPeriode();
@@ -122,7 +126,7 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
     },
     {
       name: "Prévision",
-      selector: (row) => row.prevision,
+      selector: (row) => (row.prevision == undefined ? "N.d" : row.prevision),
     },
     {
       name: "Réalisations",
@@ -130,7 +134,7 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
     },
     {
       name: "Ecart",
-      selector: (row) => row.ecart,
+      selector: (row) => (row.ecart == undefined ? "X" : row.ecart),
     },
   ];
 
@@ -177,9 +181,29 @@ export const SuiviRealisations = ({ children, idExo, idPer, idNat }) => {
             fixedHeader
             highlightOnHover
             actions={
-              <button className="buttonAll" onClick={print}>
-                Imprimer
-              </button>
+              <>
+                <button
+                  className="buttonAll"
+                  style={{
+                    marginRight: "10px",
+                  }}
+                  onClick={(e) =>
+                    imprimer *
+                    (items, columns, "Liste des réalisation des prévisions")
+                  }
+                >
+                  Imprimer
+                </button>
+                <button
+                  className="buttonAll"
+                  onClick={(e) => telechargerExcelFile(items, columns)}
+                  style={{
+                    marginRight: "10px",
+                  }}
+                >
+                  Export Excel
+                </button>
+              </>
             }
           />
         </div>
